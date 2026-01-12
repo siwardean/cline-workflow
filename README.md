@@ -1,206 +1,129 @@
-# Cline Development Workflow Kit with GitLab And SonarQube
+# Cline GitLab Workflow Kit
 
-A minimal, **workflow-driven** setup for using Cline with:
-- GitLab Merge Requests (via local GitLab MCP)
-- SonarQube (via local Sonar MCP)
-- Daily **morning** planning and **EOD** MR updates
-- Reviewer thread tracking + draft replies
-- Angular Conventional Commits for semantic-release
-- Clean Code + tests/coverage + SonarQube quality gates
-- Project contribution governance
+**AI-assisted GitLab MR workflows** with automatic status checks, MR updates, and code quality tracking.
+
+Works with: GitLab + SonarQube + Cline (VS Code extension)
 
 ---
 
-## 👋 New to AI Coding Assistants?
+## ⚡ Quick Start (10 minutes)
 
-**Welcome!** If you've never used an AI agent like Cline before, don't worry - it's easier than you think!
+### 1) Install MCP Servers
 
-**Think of Cline as your helpful pair programmer** who:
-- ✅ Never gets tired of checking SonarQube
-- ✅ Loves writing commit messages
-- ✅ Remembers to update your MR description
-- ✅ Keeps track of reviewer comments for you
+```bash
+pip install uv
+uv pip install python-gitlab-mcp sonar-mcp
+```
 
-**You're still in charge!** You write the features, make the decisions. Cline just handles the tedious stuff.
+### 2) Install Workflows Globally (Recommended)
 
-### 📚 Learning Resources
+```bash
+# Clone temporarily
+git clone https://github.com/siwardean/cline-workflow.git
+cd cline-workflow
 
-**Start here:**
-- **[User Guide](USER_GUIDE.md)** - Step-by-step walkthrough of your first feature (15 min read)
-- **[Quick Reference](docs/quick-reference.md)** - Cheat sheet for common tasks (keep it handy!)
-- **[Workflow Examples](docs/workflow-examples.md)** - See real examples of each workflow in action
+# Install globally (works for ALL projects)
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
 
-**Quick Examples:**
+# Cleanup
+cd .. && rm -rf cline-workflow
+```
 
-| You say to Cline | What happens |
-|------------------|--------------|
-| `Run the morning.md workflow` | Shows you MR status, reviewer comments, SonarQube results |
-| `Run the commit.md workflow` | Runs tests, proposes commit message, commits if you approve |
-| `Run the eod.md workflow` | Updates your MR, drafts replies to reviewers |
+### 3) Configure MCP Servers in VS Code
 
-**Your first command:** Just say "Run the morning.md workflow" and Cline will check your MR status!
+**Option A: Using Cline UI (Recommended)**
+1. Open VS Code → Cline extension
+2. Click **Settings** (gear icon) → **MCP Servers**
+3. Add servers using the UI
+
+**Option B: Edit JSON Directly**
+
+Open Cline settings and add to `cline_mcp_settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "gitlab": {
+      "command": "python-gitlab-mcp",
+      "args": [],
+      "env": {
+        "GITLAB_URL": "https://gitlab.company.tld",
+        "GITLAB_TOKEN": "your-personal-access-token-here",
+        "GITLAB_ALLOWED_PROJECT_IDS": "12345,67890"
+      }
+    },
+    "sonarqube": {
+      "command": "sonar-mcp",
+      "args": [],
+      "env": {
+        "SONAR_URL": "https://sonar.company.tld",
+        "SONAR_TOKEN": "your-sonar-token-here"
+      }
+    }
+  }
+}
+```
+
+**Get your tokens:**
+- **GitLab**: Settings → Access Tokens → Scope: `api`
+- **SonarQube**: My Account → Security → Generate Token
+
+**⚠️ Never commit tokens!**
+
+### 4) Configure Your Project
+
+Create `memory-bank/current-mr.md` in your GitLab project:
+
+```yaml
+# Current MR Configuration
+# ⚠️ UPDATE THESE VALUES FOR YOUR PROJECT ⚠️
+
+base_branch: main
+feature_branch: feature/my-feature
+
+# GitLab project configuration
+project_id: 12345
+mr_iid: 67
+
+# SonarQube configuration
+sonar_project_key: my-project
+
+# MR template path (relative to repo root)
+mr_template_path: .gitlab/merge_request_templates/default_merge_request.md
+
+# Pre-commit hook runner (optional)
+# Options: "lint-staged" | "pre-commit" | "both" | null
+precommit_runner: null
+```
+
+### 5) Test It!
+
+Open your project in VS Code and say to Cline:
+
+```
+Run the morning.md workflow
+```
+
+You should see MR threads, pipeline status, and SonarQube results!
 
 ---
 
-## Folder structure
+## 📋 Available Workflows
 
-### **Option A: Project-Specific Setup** (Optional - For Customization)
-
-All files in your **project root** (workspace root directory):
-
-```
-your-project/              ← Open this folder in VS Code
-├── .clinerules/           ← Cline reads automatically from here
-│   ├── rules.md           ← Workspace rules & standards
-│   └── workflows/
-│       ├── start.md       # Start a new feature from user story
-│       ├── morning.md     # Daily status check (threads, SonarQube, pipeline)
-│       ├── eod.md         # Update MR & draft reviewer replies
-│       ├── commit.md      # Stage, test, commit with conventional message
-│       └── close.md       # Post-merge retrospective
-│
-├── memory-bank/           ← Project state & configuration
-│   ├── current-mr.md      # Your project configuration (update this first!)
-│   ├── handover.md        # Daily progress tracker
-│   ├── story.md           # Feature plan
-│   └── retro.md           # Retrospective after merge
-│
-├── docs/                  ← Reference documentation
-│   ├── quick-reference.md    # Cheat sheet for common tasks
-│   └── workflow-examples.md  # Real examples of each workflow
-│
-├── .gitlab/
-│   └── merge_request_templates/
-│       └── default.md     # MR description template
-│
-├── README.md              ← You are here
-├── USER_GUIDE.md          ← Start here for beginners
-├── CHANGELOG.md           ← Release notes
-└── validate_mcp_setup.py  ← Setup validation script
-```
-
-### **Option B: Global Setup** ⭐ **Recommended**
-
-Files in your **Documents folder** (applies to all projects):
-
-**Why recommended:** These workflows are generic and work with ANY GitLab + SonarQube project.
-
-```
-~/Documents/Cline/         ← Your Documents/Cline folder (all platforms)
-├── Rules/                 ← Global rules (note: capital R)
-│   └── rules.md
-└── Workflows/             ← Global workflows (note: capital W)
-    ├── start.md
-    ├── morning.md
-    ├── eod.md
-    ├── commit.md
-    └── close.md
-```
-
-**Note for Linux/WSL users:** Check `~/Cline/Rules/` if `~/Documents/Cline/` doesn't exist on your system.
-
-**💡 Recommended Setup:** 
-1. **Install workflows globally** (one-time): `~/Documents/Cline/`
-2. **Per project**: Only `memory-bank/` with config needed
-3. **Result**: Clean projects, workflows available everywhere!
-
-**How it works:**
-- **Global**: Cline reads `~/Documents/Cline/Rules/rules.md` for all projects
-- **Project-specific** (optional): Add `.clinerules/` only if you need customization
-- **Both**: Project rules override global rules when present
-
-## MCP servers used by this project
-
-This project relies on **local MCP (Model Context Protocol) servers** so Cline can interact with enterprise GitLab and SonarQube instances even when an official MCP endpoint is not available/enabled.
-
-### GitLab MCP (local, Python)
-- Project: https://github.com/wadew/gitlab-mcp
-- Purpose in this kit:
-  - read MR discussions/threads (with conversation history)
-  - check pipeline status / jobs
-  - update MR description (from repo MR template)
-  - draft replies to remediated review threads
-
-### SonarQube MCP (local, Python)
-- Project: https://github.com/wadew/sonar-mcp
-- Purpose in this kit:
-  - check quality gate status
-  - list bugs/vulnerabilities/code smells
-  - read coverage metrics (overall and per-file)
-
-> Notes for enterprise setups: you typically want branch/MR context (not only main branch). This kit’s workflows are written so the agent can use MCP tool schema discovery if your SonarQube parameters differ by installation.
+| Workflow | Command | What it does |
+|----------|---------|--------------|
+| **morning.md** | `Run the morning.md workflow` | Check MR status, threads, SonarQube |
+| **eod.md** | `Run the eod.md workflow` | Update MR, draft replies, write handover |
+| **commit.md** | `Run the commit.md workflow` | Stage, test, propose commit message |
+| **start.md** | `Run the start.md workflow` | Create plan from user story |
+| **close.md** | `Run the close.md workflow` | Write retrospective after merge |
 
 ---
 
-## 🚀 Quick Start (5 minutes)
-
-### 0) Understanding File Locations
-
-You have **two setup options** for `.clinerules/`:
-
-#### **Option A: Project-Specific** (For Team Customization)
-```
-your-project/                    ← Open this folder in VS Code
-├── .clinerules/                 ← Project workflows
-│   ├── rules.md
-│   └── workflows/
-├── memory-bank/
-└── ...
-```
-
-**When to use:**
-- Team needs customized workflows different from the generic ones
-- Team wants to ensure everyone uses identical versions
-- Project-specific rules or process variations
-
-**Benefits:**
-- ✅ Committed to git → entire team uses same workflows
-- ✅ Version controlled → changes are tracked
-- ✅ Project-specific customization possible
-
-#### **Option B: Global** (⭐ Recommended - Reusable Across Projects)
-```
-~/Documents/Cline/               ← Your Documents folder (all platforms)
-├── Rules/                       ← Global rules (note: capital R)
-│   └── rules.md
-└── Workflows/                   ← Global workflows (note: capital W)
-    ├── morning.md
-    ├── eod.md
-    └── ...
-```
-
-**Note for Linux/WSL users:** If `~/Documents/` doesn't exist, Cline may use `~/Cline/Rules/` instead.
-
-**Why this is recommended:**
-- ⭐ **These workflows are generic** - they work with ANY GitLab + SonarQube project
-- ⭐ **Install once, use everywhere** - no need to copy to each project
-- ⭐ **Update once, benefit everywhere** - improvements propagate to all projects
-- ⭐ **Cleaner projects** - no workflow files cluttering your repos
-
-**Benefits:**
-- ✅ Applies to all your projects automatically
-- ✅ Set up once, never repeat
-- ✅ Works for solo developers AND teams
-- ✅ Each project just needs `memory-bank/current-mr.md` configuration
-
-#### **Which Should You Use?**
-
-| Use Case | Recommendation |
-|----------|---------------|
-| **Default recommendation** | **Global (Option B)** ⭐ |
-| Generic workflows (these!) | Global (Option B) |
-| Solo developer | Global (Option B) |
-| Team using generic workflows | Global (Option B) - each dev installs |
-| Team needs customization | Project-specific (Option A) |
-| Want version-controlled workflows | Project-specific (Option A) |
-| Mix of both | Both! (project overrides global) |
-
-**💡 Recommended Approach:**
-1. **Install workflows globally** (`~/Documents/Cline/`) - one time setup
-2. **Per project:** Only add `memory-bank/current-mr.md` with project config
-3. **Customize if needed:** Add project-specific `.clinerules/` only when you need different behavior
-
-#### **How Cline Discovers Rules**
+## 🔄 How Cline Finds Workflows
 
 ```mermaid
 flowchart TD
@@ -214,503 +137,183 @@ flowchart TD
     Override --> Done
 ```
 
-**Key Point:** Cline reads global first (`~/Documents/Cline/`), then project-specific (`.clinerules/`). Project rules override global rules.
-
-### 1) Get the workflows
-
-**Recommended: Install globally (reusable across all projects)**
-```bash
-# Clone this repository temporarily
-git clone https://github.com/siwardean/cline-workflow.git
-cd cline-workflow
-
-# Install workflows globally (one-time setup)
-mkdir -p ~/Documents/Cline/Rules
-mkdir -p ~/Documents/Cline/Workflows
-cp .clinerules/rules.md ~/Documents/Cline/Rules/
-cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
-
-# Now available for ALL your projects!
-cd ..
-rm -rf cline-workflow  # Clean up - you don't need it anymore
-```
-
-**Alternative: Project-specific (for team customization)**
-```bash
-# Clone into your project
-git clone https://gitlab.company.tld/<your-org>/<your-repo>.git
-cd <your-repo>
-
-# Workflows are in .clinerules/ - customize as needed
-```
-
-### 1.5) Setup Per Project (Quick!)
-
-**If you installed globally (recommended):**
-
-For each GitLab project, just create the configuration:
-
-```bash
-cd your-project
-
-# Create memory-bank directory (only thing needed per project!)
-mkdir -p memory-bank
-```
-
-Then create `memory-bank/current-mr.md` with your project details (see step 6).
-
-**That's it!** Workflows are already available from global installation.
+**Global Location:** `~/Documents/Cline/Rules/` and `~/Documents/Cline/Workflows/`  
+**Project Location:** `.clinerules/` (optional - for customization)
 
 ---
 
-**If using Project-Specific setup:**
-```bash
-# Create global Cline directories
-mkdir -p ~/Documents/Cline/Rules
-mkdir -p ~/Documents/Cline/Workflows
+## 🏗️ File Structure
 
-# Copy rules to global location
-cp .clinerules/rules.md ~/Documents/Cline/Rules/
-
-# Copy workflows to global location
-cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
-
-# Linux/WSL alternative (if Documents doesn't exist):
-# mkdir -p ~/Cline/Rules && mkdir -p ~/Cline/Workflows
+### Global Setup (Recommended)
 ```
-
-**If using Project-Specific (Option A):**
-- Skip the above - files are already in the project!
-- Continue with the steps below
-
-**Using Both?**
-- Keep common patterns in `~/Documents/Cline/` (global)
-- Keep project-specific rules in `.clinerules/` (project)
-- Project rules will override global rules
-
-### 2) Create and activate a virtual environment (recommended)
-```bash
-pip install uv
-uv venv .venv
-
-# macOS/Linux
-source .venv/bin/activate
-
-# Windows (PowerShell)
-. .\.venv\Scripts\Activate.ps1
-```
-
-### 3) Install MCP servers
-```bash
-uv pip install gitlab-mcp sonar-mcp
-```
-
-### 4) Create API tokens
-**GitLab**
-- Create a Personal Access Token (PAT)
-- Scope: `api`
-
-**SonarQube**
-- Create a Sonar token with permission to browse issues/metrics
-
-⚠️ Never commit these tokens.
-
-### 5) Configure MCP servers in Cline
-In **Cline → MCP Servers**, add:
-
-**GitLab MCP**
-- Command: `gitlab-mcp`
-- Environment variables:
-  ```text
-  GITLAB_URL=https://gitlab.company.tld
-  GITLAB_TOKEN=xxxxxxxx
-  GITLAB_ALLOWED_PROJECT_IDS=12345
-  ```
-
-**SonarQube MCP**
-- Command: `sonar-mcp`
-- Environment variables:
-  ```text
-  SONAR_URL=https://sonar.company.tld
-  SONAR_TOKEN=xxxxxxxx
-  ```
-
-Restart Cline after adding servers.
-
-### 6) Fill project metadata
-Edit `memory-bank/current-mr.md`:
-
-```md
-base_branch: main
-feature_branch: my-feature
-
-project_id: 12345
-mr_iid: 67
-
-sonar_project_key: my-project
-
-mr_template_path: .gitlab/merge_request_templates/default.md
-
-precommit_runner: null  # or "lint-staged" | "pre-commit" | "both"
-```
-
-### 7) Validate your setup (optional but recommended)
-```bash
-python validate_mcp_setup.py
-```
-
-This checks:
-- Project structure
-- Memory bank configuration
-- MCP package installation
-- GitLab/SonarQube environment variables (if running in Cline)
-
-### 8) Run your first workflow
-
-**Make sure you've opened the project folder in VS Code** (not just individual files).
-
-In Cline, run:
-```
-Run the morning.md workflow
-```
-
-If you see MR thread summaries and quality signals → you're ready!
-
-**Troubleshooting:**
-- ❌ "Cline can't find the workflow" → Check that `.clinerules/` is in your workspace root
-- ❌ "Rules not being followed" → Verify you opened the **project folder** in VS Code, not a parent directory
-- ✅ Check: Look at VS Code's sidebar - you should see `.clinerules/` folder at the root level
-
----
-
-## 💡 How to Use This Kit (Day-to-Day)
-
-### Typical Day with Cline
-
-**Morning (2 minutes):**
-```
-You: Run the morning.md workflow
-
-Cline: [Shows MR status, reviewer comments, SonarQube results, suggests priorities]
-```
-
-**While Coding:**
-```
-You: Let's implement the password validation function
-
-Cline: [Writes code, creates tests, runs them]
-
-You: Looks good! Run the commit.md workflow
-
-Cline: [Stages changes, runs hooks, proposes commit message, commits if approved]
-```
-
-**End of Day (2 minutes):**
-```
-You: Run the eod.md workflow
-
-Cline: [Updates MR description, drafts replies to reviewer threads, updates handover]
-```
-
-**Total time saved per day: 30-60 minutes** ⏰
-
-### Real Example: Your First Conversation
-
-**You:** `Run the morning.md workflow`
-
-**Cline responds:**
-```
-🔍 Checking MR !67...
-
-GitLab Status:
-- Pipeline: ✅ PASSING
-- Threads: 2 unresolved
-
-Thread #1: "Can you add error handling here?"
-Thread #2: "Missing tests for edge case"
-
-SonarQube: ✅ Quality Gate PASSED
-Coverage: 85.2%
-
-Today's priorities:
-1. Add error handling (Thread #1)
-2. Add edge case tests (Thread #2)
-
-Ready to start with Thread #1?
-```
-
-**You:** `Yes, let's fix the error handling`
-
-**Cline:** `[Reads the file, adds try-catch, updates tests, shows you the diff]`
-
-**You:** `Perfect! Run the commit.md workflow`
-
-**See? Easy!** Check [USER_GUIDE.md](USER_GUIDE.md) for complete walkthroughs.
-
----
-
-## ✅ MCP validation & troubleshooting
-
-### Quick validation
-Run the validation script to check your setup:
-
-```bash
-python validate_mcp_setup.py
-```
-
-### Manual validation
-
-### Validate GitLab MCP
-In Cline:
-- Ask it to **list available GitLab MCP tools**
-- Then ask it to **fetch MR !<mr_iid> metadata**
-
-If it fails:
-- verify `GITLAB_URL`
-- PAT scope = `api`
-- correct `project_id` and `mr_iid`
-- ensure `GITLAB_ALLOWED_PROJECT_IDS` includes your project
-
-### Validate SonarQube MCP
-In Cline:
-- Ask it to **list available Sonar MCP tools**
-- Then ask it to **get quality gate status** for your project (branch/MR context if needed)
-
-If it fails:
-- verify `SONAR_URL`
-- Sonar token permissions
-- confirm your project key exists in SonarQube
-
----
-
-## Workflows (run in Cline)
-
-Just say **"Run the [workflow-name] workflow"** in Cline:
-
-| Workflow | When to use | What it does |
-|----------|-------------|--------------|
-| `start.md` | Beginning of feature | Paste Rally story → generates execution plan |
-| `morning.md` | Start of day | Shows MR threads, pipeline, SonarQube status, priorities |
-| `eod.md` | End of day | Updates MR description, drafts reviewer replies, writes handover |
-| `commit.md` | After coding | Stages changes, runs hooks, proposes commit message |
-| `close.md` | After MR merges | Creates retrospective comparing plan vs reality |
-
-**Example:** Type `Run the morning.md workflow` in Cline and hit enter! 🚀
-
-📖 **See detailed examples:** [docs/workflow-examples.md](docs/workflow-examples.md)
-
----
-
-## Contributing / Development workflow (enforced by EOD)
-
-### Commits (Conventional Commits)
-This repository uses **semantic-release** to generate changelogs and manage versioning.
-Commits must follow **Angular Conventional Commits**:
-
-`<type>(<scope>): <subject>`
-
-Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
-
-### Merge Request overview
-MR descriptions must be based on the repository’s **default MR template** and filled out accurately.
-
-### Merge Requests (reviews & threads)
-When a thread is remediated, reply with:
-- what changed
-- where (file/module)
-- how to verify (tests/commands)
-…and request the reviewer to confirm and resolve the thread.
-
-### Quality gates (tests, coverage, SonarQube)
-- All functional changes must include or update automated tests.
-- Avoid reducing coverage without justification.
-- CI runs SonarQube analysis; new issues introduced by the MR must be fixed and quality gate must pass.
-
----
-
-## ❓ FAQ & Troubleshooting
-
-### "Where do these files go?"
-
-**You have two options:**
-
-**Option A: Project-Specific** (in your project folder)
-```
-your-project/          ← Open THIS folder in VS Code
-├── .clinerules/       ← Project workflows
-├── memory-bank/
-└── ...
-```
-
-**Option B: Global** (in your home directory)
-```
-~/Documents/Cline/     ← Applies to all projects
+~/Documents/Cline/               ← Install once, use everywhere
 ├── Rules/
 │   └── rules.md
 └── Workflows/
     ├── morning.md
-    └── ...
+    ├── eod.md
+    ├── commit.md
+    ├── start.md
+    └── close.md
 ```
 
-**Cline reads global first, then project-specific. Project rules override global.**
+### Per Project (Required)
+```
+your-gitlab-project/
+└── memory-bank/
+    └── current-mr.md            ← Only this file needed per project!
+```
 
-**Not working?**
-- **Project setup:** Check VS Code's file explorer - is `.clinerules/` at the top level?
-- **Global setup:** Check `~/Documents/Cline/Rules/` exists (or `~/Cline/Rules/` on some Linux systems)
-- Did you open the project **folder**, not a subdirectory?
-- Try restarting VS Code after setup
+### Optional: Project-Specific Customization
+```
+your-gitlab-project/
+├── .clinerules/                 ← Add only if you need custom workflows
+│   ├── rules.md
+│   └── workflows/
+└── memory-bank/
+    └── current-mr.md
+```
 
-### "Should I use global or project-specific setup?"
+---
 
-**⭐ Recommended: Global Setup**
+## 🛠️ Troubleshooting
 
-These workflows are **generic** - they work with ANY GitLab + SonarQube project. Installing globally means:
-- ✅ Set up once, use everywhere
-- ✅ No workflow files in your project repos
-- ✅ Works for solo AND team environments
-- ✅ Update once, all projects benefit
+### "Cline can't find workflows"
 
-**Use Project-Specific only if:**
-- You need workflows different from the generic ones
-- Team requires version-controlled workflows
-- Project has unique process requirements
+**Check global location:**
+```bash
+ls ~/Documents/Cline/Rules/
+ls ~/Documents/Cline/Workflows/
+```
 
-**Best Practice:**
-1. **Everyone on the team** installs workflows globally (same version)
-2. **Each project** only has `memory-bank/current-mr.md` with project config
-3. **If needed** Add project-specific `.clinerules/` for customizations only
+Should see `rules.md` and workflow files. If not, reinstall (see step 2).
 
-**Why this works for teams:** Everyone uses the same generic workflows, but each project configures its own GitLab project ID, MR details, etc. in `memory-bank/current-mr.md`.
+### "Can't access GitLab MR"
 
-### "How do I talk to Cline?"
+1. Verify MCP configuration in Cline settings
+2. Check `memory-bank/current-mr.md` has correct `project_id` and `mr_iid`
+3. Verify GitLab token has `api` scope
+4. Run: `python validate_mcp_setup.py`
 
-Just type naturally in the Cline chat window:
-- ✅ "Run the morning.md workflow"
-- ✅ "Show me unresolved MR threads"
-- ✅ "Help me fix the SonarQube bug"
-- ✅ "Let's implement the password validator"
+### "SonarQube data not showing"
 
-### "What if Cline doesn't understand me?"
+1. Verify `SONAR_URL` and `SONAR_TOKEN` in Cline MCP settings
+2. Check `sonar_project_key` in `memory-bank/current-mr.md`
+3. Run: `python validate_mcp_setup.py`
 
-Be more specific:
-- ❌ "Fix it" → ✅ "Fix the null pointer bug in AuthService.ts line 45"
-- ❌ "Update MR" → ✅ "Run the eod.md workflow"
+### "MCP servers not working"
 
-### "Cline can't see my MR threads"
+Test MCP server commands manually:
+```bash
+# Test GitLab MCP
+python-gitlab-mcp --version
 
-1. Run `python validate_mcp_setup.py`
-2. Check `memory-bank/current-mr.md`:
-   - Is `project_id` correct?
-   - Is `mr_iid` correct?
-3. Verify GitLab MCP in Cline settings:
-   - `GITLAB_TOKEN` has `api` scope
-   - `GITLAB_ALLOWED_PROJECT_IDS` includes your project
+# Test SonarQube MCP
+sonar-mcp --version
+```
 
-### "SonarQube data isn't showing"
+If errors, reinstall:
+```bash
+uv pip install --upgrade python-gitlab-mcp sonar-mcp
+```
 
-1. Run `python validate_mcp_setup.py`
-2. Check SonarQube MCP configuration:
-   - `SONAR_URL` correct?
-   - `SONAR_TOKEN` valid?
-3. Verify `sonar_project_key` in `memory-bank/current-mr.md`
+---
 
-### "Pre-commit hooks aren't running"
+## 📚 Documentation
 
-Edit `memory-bank/current-mr.md` and set:
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Complete walkthrough with examples (15 min read)
+- **[docs/quick-reference.md](docs/quick-reference.md)** - Cheat sheet
+- **[docs/workflow-examples.md](docs/workflow-examples.md)** - Real scenarios
+- **[CHANGELOG.md](CHANGELOG.md)** - Release notes
+
+---
+
+## 🔧 MCP Servers Used
+
+### python-gitlab-mcp
+- **Project**: https://github.com/wadew/gitlab-mcp
+- **Purpose**: Read MR threads, check pipelines, update MR descriptions
+- **Install**: `uv pip install python-gitlab-mcp`
+
+### sonar-mcp
+- **Project**: https://github.com/wadew/sonar-mcp
+- **Purpose**: Check quality gates, get coverage, list issues
+- **Install**: `uv pip install sonar-mcp`
+
+---
+
+## ⚙️ Advanced Configuration
+
+### Using Both Global + Project-Specific
+
+**Global** (`~/Documents/Cline/`): Common workflows for all projects  
+**Project** (`.clinerules/`): Project-specific overrides
+
+When both exist: **Project rules override global rules**
+
+### Pre-commit Hooks
+
+Edit `memory-bank/current-mr.md`:
 ```yaml
 precommit_runner: "lint-staged"  # or "pre-commit" or "both"
 ```
 
-### "I made a mistake, how do I undo?"
+Commit workflow will automatically run hooks before committing.
 
-Just tell Cline:
-```
-Undo that last change
-```
+### Custom MR Templates
 
-Or use git:
-```
-git restore <filename>
-```
-
-### "Where can I learn more?"
-
-- **[User Guide](USER_GUIDE.md)** - Complete walkthrough with examples
-- **[Quick Reference](docs/quick-reference.md)** - Cheat sheet
-- **[Workflow Examples](docs/workflow-examples.md)** - Real scenario examples
-
-### "Can I customize the workflows?"
-
-**Yes!** Workflows are just markdown files in `.clinerules/workflows/`. Edit them to match your team's process.
-
-### "What if I'm stuck?"
-
-Ask Cline:
-```
-I'm stuck. Can you explain what I should do next?
-```
-
-Cline can explain itself and help you get unstuck!
+Create `.gitlab/merge_request_templates/default_merge_request.md` in your project.  
+EOD workflow uses this template when updating MR descriptions.
 
 ---
 
-## 📦 Public GitHub release checklist
+## 📝 Conventional Commits
 
-### Documentation
-- [ ] README includes Quick Start + MCP setup + workflow overview + beginner section
-- [ ] User guide with step-by-step examples (`USER_GUIDE.md`)
-- [ ] Quick reference cheat sheet (`docs/quick-reference.md`)
-- [ ] Workflow examples with real scenarios (`docs/workflow-examples.md`)
-- [ ] No internal URLs or tokens
-- [ ] Enterprise assumptions are clear
-- [ ] FAQ/Troubleshooting section complete
+All commits use Angular Conventional Commits format:
 
-### Repository hygiene
-- [ ] `.clinerules/` committed
-- [ ] `memory-bank/` committed with templates only (with configuration markers)
-- [ ] `.gitlab/merge_request_templates/` committed
-- [ ] `.gitignore` covers `.venv/`, `.env`, etc.
-- [ ] `validate_mcp_setup.py` script included
+```
+<type>(<scope>): <subject>
 
-### Workflow sanity
-- [ ] `/start.md` works with pasted story
-- [ ] `/morning.md` runs without modifying files
-- [ ] `/eod.md` updates MR description and creates thread reply drafts
-- [ ] `/commit.md` requires explicit approval
-- [ ] `validate_mcp_setup.py` runs successfully
+<body>
 
-### Security
-- [ ] Tokens are environment-only
-- [ ] GitLab MCP uses project allowlist
-- [ ] Sonar MCP token is least-privilege (read where possible)
+<footer>
+```
 
-### Licensing
-- [ ] Add a `LICENSE` file (MIT/Apache-2.0 recommended)
-- [ ] Verify MCP server licenses are compatible
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+**Example:**
+```
+feat(auth): add password strength validator
+
+Validates password strength based on length and character types.
+Returns weak/medium/strong rating.
+```
 
 ---
 
-## 🤝 Getting Help & Contributing
+## 🤝 Contributing
 
-### New to this?
-Start with [USER_GUIDE.md](USER_GUIDE.md) - it walks you through everything step-by-step!
+Found an issue? Have a suggestion?
 
-### Quick help
-- **[Quick Reference](docs/quick-reference.md)** - Cheat sheet for common tasks
-- **[Workflow Examples](docs/workflow-examples.md)** - See real examples
-- **[FAQ](#-faq--troubleshooting)** - Common questions answered
+1. Create an issue: https://github.com/siwardean/cline-workflow/issues
+2. Submit a PR
+3. Share your workflow customizations
 
-### Contributing
-Contributions welcome! This is an open-source template designed to be customized. Feel free to:
-- Add new workflows for your team's processes
-- Improve documentation with your learnings
-- Share your customizations via PRs
-- Report issues or suggest improvements
+---
 
-### Questions?
-**Just ask Cline!** Seriously:
-```
-Can you explain how this workflow kit works?
-```
+## 📄 License
 
-Cline can read all these docs and explain them to you! 🤖
+MIT License - See [LICENSE](LICENSE) file
+
+---
+
+## 🙏 Credits
+
+Built for teams using:
+- **Cline** - AI coding assistant for VS Code
+- **GitLab** - Source control & MR management
+- **SonarQube** - Code quality & security
+
+MCP servers by [wadew](https://github.com/wadew):
+- python-gitlab-mcp
+- sonar-mcp

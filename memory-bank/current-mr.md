@@ -12,7 +12,7 @@ mr_iid: 1
 sonar_project_key: my-project
 
 # MR template path (relative to repo root)
-mr_template_path: .gitlab/merge_request_templates/default.md
+mr_template_path: .gitlab/merge_request_templates/default_merge_request.md
 
 # Pre-commit hook runner (optional)
 # Options: "lint-staged" | "pre-commit" | "both" | null

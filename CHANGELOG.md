@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **BREAKING**: Renamed GitLab MR template from `default.md` to `default_merge_request.md` (correct GitLab naming)
+- **CRITICAL**: Fixed package name from `gitlab-mcp` to `python-gitlab-mcp` (correct PyPI package)
+- Updated all references in documentation and validation script
+- Dramatically shortened README from 717 to ~250 lines - focused on essentials only
+- Added clear MCP configuration with actual JSON examples from `cline_mcp_settings.json`
+- Added MCP server testing commands for troubleshooting
+- Improved Quick Start with step-by-step MCP setup (UI and JSON methods)
+
 ### Changed
 - **Recommendation changed:** Global setup now recommended as default (workflows are generic/reusable)
 - Updated Quick Start to emphasize global installation first
@@ -111,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - FAQ with 10+ common questions and solutions
   - Public release checklist
 
-- **USER_GUIDE.md** - Comprehensive beginner walkthrough (595 lines)
+- **USER_GUIDE.md** - Comprehensive beginner walkthrough (780 lines)
   - "What is This?" explanation for AI assistant newcomers
   - "How to Talk to Cline" with three invocation methods
   - Complete first feature walkthrough (day-by-day)
@@ -139,7 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Complete conversation examples showing user input and Cline responses
 
 #### Templates & Configuration
-- **.gitlab/merge_request_templates/default.md** - MR description template
+- **.gitlab/merge_request_templates/default_merge_request.md** - MR description template
   - Summary section with user story reference
   - Proposed changes with key components
   - Risk and limitations with mitigation

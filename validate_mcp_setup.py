@@ -156,7 +156,7 @@ def validate_project_structure():
         ("memory-bank/handover.md", "Handover template"),
         ("memory-bank/story.md", "Story template"),
         ("memory-bank/retro.md", "Retro template"),
-        (".gitlab/merge_request_templates/default.md", "MR template"),
+        (".gitlab/merge_request_templates/default_merge_request.md", "MR template"),
         (".gitignore", "Git ignore file"),
     ]
     
@@ -173,7 +173,7 @@ def validate_mcp_packages():
     
     all_good = True
     
-    packages = ["gitlab-mcp", "sonar-mcp"]
+    packages = ["python-gitlab-mcp", "sonar-mcp"]
     
     for package in packages:
         try:
@@ -228,7 +228,7 @@ def main():
         print("\nNext steps:")
         print("1. Update memory-bank/current-mr.md with your project details")
         print("2. Configure MCP servers in Cline → MCP Servers")
-        print("3. Install missing packages: uv pip install gitlab-mcp sonar-mcp")
+        print("3. Install missing packages: uv pip install python-gitlab-mcp sonar-mcp")
         print("4. Run this script again to verify")
         return 1
 
