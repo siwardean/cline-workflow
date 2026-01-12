@@ -12,12 +12,23 @@ Before ending the workday:
 
 ## Steps (tool-first)
 
-### 1) Read configuration
+### 1) Read configuration and list MRs
 ```
 read_file: memory-bank/current-mr.md
 read_file: memory-bank/story.md (if exists)
 ```
-Extract: project_id, mr_iid, mr_template_path, story context
+Extract: project_id, merge_requests list, mr_template_path, story context
+
+**Show user all active MRs:**
+```
+Your active MRs:
+1. !67 - feature/user-authentication: "User authentication with JWT"
+2. !68 - feature/password-reset: "Password reset flow"
+
+Which MR(s) would you like to update? (enter number, or 'all')
+```
+
+**Wait for user selection before proceeding.**
 
 ### 2) Fetch latest SonarQube status (via MCP)
 **List MCP tools available**, then fetch:

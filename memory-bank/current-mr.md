@@ -1,12 +1,25 @@
-# Current MR Configuration
+# Current Project Configuration
 # ⚠️ UPDATE THESE VALUES FOR YOUR PROJECT ⚠️
 
 base_branch: main
-feature_branch: feature-x
 
 # GitLab project configuration
 project_id: 123
-mr_iid: 1
+
+# Merge Requests to track (add multiple MRs here!)
+merge_requests:
+  - mr_iid: 67
+    feature_branch: feature/user-authentication
+    description: "User authentication with JWT"
+  
+  - mr_iid: 68
+    feature_branch: feature/password-reset
+    description: "Password reset flow"
+  
+  # Add more MRs as needed:
+  # - mr_iid: 69
+  #   feature_branch: feature/profile-page
+  #   description: "User profile page"
 
 # SonarQube configuration
 sonar_project_key: my-project
@@ -16,5 +29,4 @@ mr_template_path: .gitlab/merge_request_templates/default_merge_request.md
 
 # Pre-commit hook runner (optional)
 # Options: "lint-staged" | "pre-commit" | "both" | null
-# If set, the /commit.md workflow will automatically run these hooks
 precommit_runner: null

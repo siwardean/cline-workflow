@@ -87,26 +87,37 @@ Open Cline settings and add to `cline_mcp_settings.json`:
 Create `memory-bank/current-mr.md` in your GitLab project:
 
 ```yaml
-# Current MR Configuration
+# Current Project Configuration
 # ⚠️ UPDATE THESE VALUES FOR YOUR PROJECT ⚠️
 
 base_branch: main
-feature_branch: feature/my-feature
 
 # GitLab project configuration
 project_id: 12345
-mr_iid: 67
+
+# Merge Requests to track (supports MULTIPLE MRs!)
+merge_requests:
+  - mr_iid: 67
+    feature_branch: feature/user-authentication
+    description: "User authentication with JWT"
+  
+  - mr_iid: 68
+    feature_branch: feature/password-reset
+    description: "Password reset flow"
+  
+  # Add more MRs as needed
 
 # SonarQube configuration
 sonar_project_key: my-project
 
-# MR template path (relative to repo root)
+# MR template path
 mr_template_path: .gitlab/merge_request_templates/default_merge_request.md
 
 # Pre-commit hook runner (optional)
-# Options: "lint-staged" | "pre-commit" | "both" | null
 precommit_runner: null
 ```
+
+**✨ New: Multi-MR Support!** Track and manage multiple merge requests in one project.
 
 ### 5) Test It!
 
@@ -116,7 +127,7 @@ Open your project in VS Code and say to Cline:
 Run the morning.md workflow
 ```
 
-You should see MR threads, pipeline status, and SonarQube results!
+You should see status for **all your MRs**, including threads, pipeline status, and SonarQube results!
 
 ---
 
@@ -124,8 +135,8 @@ You should see MR threads, pipeline status, and SonarQube results!
 
 | Workflow | Command | What it does |
 |----------|---------|--------------|
-| **morning.md** | `Run the morning.md workflow` | Check MR status, threads, SonarQube |
-| **eod.md** | `Run the eod.md workflow` | Update MR, draft replies, write handover |
+| **morning.md** | `Run the morning.md workflow` | Check status across **ALL MRs**, threads, SonarQube |
+| **eod.md** | `Run the eod.md workflow` | Update selected MR(s), draft replies, write handover |
 | **commit.md** | `Run the commit.md workflow` | Stage, test, propose commit message |
 | **start.md** | `Run the start.md workflow` | Create plan from user story |
 | **close.md** | `Run the close.md workflow` | Write retrospective after merge |

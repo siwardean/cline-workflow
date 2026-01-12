@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Multi-MR support**: Track and manage multiple merge requests in one project
+  - Updated `memory-bank/current-mr.md` with `merge_requests` list (array of MRs)
+  - Morning workflow now shows status across ALL your MRs
+  - EOD workflow asks which MR(s) to update
+  - Each MR has: mr_iid, feature_branch, description
 - `requirements.txt` file for easy MCP server installation
 
 ### Fixed

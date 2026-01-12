@@ -1,13 +1,13 @@
-# /morning.md — Daily Status & Planning
+# /morning.md — Daily Status & Planning (Multi-MR Support)
 
 ## Objective
-Start the day with a comprehensive status check:
-- Review MR threads and pipeline status
+Start the day with a comprehensive status check across ALL your merge requests:
+- Review MR threads and pipeline status for each MR
 - Check SonarQube quality metrics
 - Identify priorities for today
 
 ## Prerequisites
-- `memory-bank/current-mr.md` configured with project_id, mr_iid, sonar_project_key
+- `memory-bank/current-mr.md` configured with project_id, merge_requests list, sonar_project_key
 
 ## Steps (tool-first)
 
@@ -15,9 +15,11 @@ Start the day with a comprehensive status check:
 ```
 read_file: memory-bank/current-mr.md
 ```
-Extract: project_id, mr_iid, base_branch, feature_branch, sonar_project_key
+Extract: project_id, merge_requests (list with mr_iid, feature_branch, description), base_branch, sonar_project_key
 
 **Error handling:** If file missing or fields empty, stop and ask user to configure it.
+
+**Multi-MR handling:** Process each MR in the merge_requests list.
 
 ### 2) Check Git status
 ```
@@ -26,13 +28,15 @@ run_terminal_cmd: git log --oneline -5
 ```
 Show user their current branch and recent commits.
 
-### 3) Fetch GitLab MR data (via MCP)
-**List MCP tools available** to discover exact tool names, then fetch:
-- MR metadata (use tool like `gitlab_get_merge_request` or similar)
-- MR discussions/threads (use tool like `gitlab_get_discussions` or similar)
-- Pipeline status (use tool like `gitlab_get_pipeline` or similar)
+### 3) Fetch GitLab MR data (via MCP) - FOR EACH MR
+**List MCP tools available** to discover exact tool names.
 
-**Error handling:** If MCP fails, inform user and suggest:
+**For each MR in merge_requests list:**
+- MR metadata (use tool like `gitlab_get_merge_request` with mr_iid)
+- MR discussions/threads (use tool like `gitlab_get_discussions` with mr_iid)
+- Pipeline status (use tool like `gitlab_get_pipeline` with mr_iid)
+
+**Error handling:** If MCP fails for any MR, note it and continue with others. Suggest:
 ```
 python validate_mcp_setup.py
 ```
@@ -56,32 +60,44 @@ Create priority matrix:
 - **Medium**: Bugs, unresolved reviewer threads
 - **Low**: Code smells, minor improvements
 
-### 6) Present summary
+### 6) Present summary for ALL MRs
 Format output as:
 ```
-🌅 Morning Status for MR !{mr_iid}
+🌅 Morning Status - Project: {project_id}
 
-📋 GitLab Status:
-- Branch: {feature_branch}
-- Pipeline: ✅ PASSING / ❌ FAILED / 🔄 RUNNING
-- Last updated: {time}
-
-💬 MR Threads ({count} unresolved):
-[List each unresolved thread with file, line, reviewer, comment]
-
-📊 SonarQube Status:
+📊 SonarQube Overall Status:
 {quality_gate_emoji} Quality Gate: {status}
 Coverage: {coverage}% ({diff} vs base)
 Issues: {bugs} bugs, {vulns} vulnerabilities, {smells} code smells
 
-[Detail blocking issues if any]
+═══════════════════════════════════════════════════════
 
-🎯 Today's Priorities:
-1. [Highest priority item]
-2. [Second priority item]
-...
+📋 MR !{mr_iid_1}: {description}
+Branch: {feature_branch}
+Pipeline: ✅ PASSING / ❌ FAILED / 🔄 RUNNING
+💬 Threads: {count} unresolved
+Priority: {HIGH/MEDIUM/LOW based on status}
 
-Next steps: [Suggested action]
+[If HIGH priority: list blocking issues]
+
+───────────────────────────────────────────────────────
+
+📋 MR !{mr_iid_2}: {description}
+Branch: {feature_branch}
+Pipeline: ✅ PASSING / ❌ FAILED / 🔄 RUNNING
+💬 Threads: {count} unresolved
+Priority: {HIGH/MEDIUM/LOW based on status}
+
+[If HIGH priority: list blocking issues]
+
+═══════════════════════════════════════════════════════
+
+🎯 Overall Priorities:
+1. [Highest priority across all MRs]
+2. [Second priority]
+3. [Third priority]
+
+💡 Suggested Focus: Start with MR !{mr_iid} ({reason})
 ```
 
 ## Output
