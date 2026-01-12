@@ -36,7 +36,11 @@ You work **with an AI pair programmer** that:
 
 ## 📂 Where Do These Files Go?
 
-**IMPORTANT:** These files go in your **project root** (workspace root):
+**You have TWO setup options!** Choose based on your needs:
+
+### **Option A: Project-Specific Setup** (For Teams)
+
+Files go in your **project root** (workspace root):
 
 ```
 your-project/                    ← Open THIS folder in VS Code
@@ -53,16 +57,144 @@ your-project/                    ← Open THIS folder in VS Code
 └── ...
 ```
 
+**When to use:**
+- ✅ Working with a team
+- ✅ Want to share workflows (commit to git)
+- ✅ Different projects need different workflows
+- ✅ Want version control
+
 **How it works:**
-1. You open the project folder in VS Code (File → Open Folder)
+1. Open the project folder in VS Code (File → Open Folder)
 2. Cline automatically discovers `.clinerules/rules.md` in the workspace root
 3. Workflows become available immediately
-4. No configuration needed!
+4. Team members get the same workflows when they clone
 
-**Common mistake:**
-- ❌ Opening a parent directory that contains your project
-- ❌ Opening just individual files
-- ✅ Opening the actual project folder where `.clinerules/` exists
+### **Option B: Global Setup** (For Solo Developers)
+
+Files go in your **home directory** (applies to ALL projects):
+
+```
+~/.cline/                        ← Your home directory (all platforms)
+├── rules.md                     ← Global rules
+└── workflows/                   ← Global workflows
+    ├── morning.md
+    ├── eod.md
+    ├── commit.md
+    └── ...
+```
+
+**When to use:**
+- ✅ Solo developer
+- ✅ Want same workflows across all projects
+- ✅ Personal productivity patterns
+- ✅ Don't want to set up per project
+
+**How to set up:**
+```bash
+# Create global Cline directory
+mkdir -p ~/.cline/workflows
+
+# Copy workflows to global location (if you cloned this repo)
+cp -r .clinerules/* ~/.cline/
+
+# Or create your own workflows there
+```
+
+**How it works:**
+1. Cline automatically reads `~/.cline/rules.md` when it starts
+2. Workflows available in ALL your projects
+3. No per-project setup needed
+
+### **Option C: Both!** (Hybrid Approach)
+
+Use global for common patterns, project-specific for team workflows:
+
+```
+~/.cline/                        ← Personal defaults
+├── rules.md                     ← Your coding standards
+└── workflows/
+    └── daily-standup.md         ← Your personal workflow
+
+your-project/                    ← Team-specific
+├── .clinerules/                 ← Team workflows
+│   ├── rules.md                 ← Team standards
+│   └── workflows/
+│       └── team-retro.md        ← Team workflow
+```
+
+**How it works:**
+1. Cline reads global first (`~/.cline/`)
+2. Then reads project-specific (`.clinerules/`)
+3. **Project rules override global rules**
+4. You get both personal + team workflows!
+
+**Example:**
+- Global: Your personal `morning.md` that checks emails
+- Project: Team's `morning.md` that checks MR threads
+- Result: Team's version is used for this project
+
+### **Practical Examples**
+
+#### **"I'm the only developer"**
+→ **Use Global (Option B)**
+- Set up once: `~/.cline/`
+- Works everywhere
+- No git commits needed
+
+#### **"Working with a team"**
+→ **Use Project-Specific (Option A)**
+- Add `.clinerules/` to project
+- Commit to git
+- Team gets same workflows
+- Everyone stays in sync
+
+#### **"I want personal shortcuts + team workflows"**
+→ **Use Both (Option C)**
+- Global: Your personal productivity hacks
+- Project: Team's required workflows
+- Best of both worlds!
+
+### **Setup Instructions**
+
+#### **For Global Setup:**
+```bash
+# Option 1: Copy from this repo
+mkdir -p ~/.cline/workflows
+cp -r .clinerules/* ~/.cline/
+
+# Option 2: Create from scratch
+mkdir -p ~/.cline/workflows
+# Then create your own rules.md and workflows
+```
+
+#### **For Project-Specific Setup:**
+```bash
+# If you cloned this repo, you're already set!
+# Just open the project folder in VS Code
+
+# To add to an existing project:
+mkdir -p your-project/.clinerules/workflows
+# Copy or create your workflows there
+```
+
+### **Common Mistakes to Avoid**
+
+❌ **Opening a parent directory that contains your project**
+- Wrong: Open `~/projects/` when your project is `~/projects/my-app/`
+- Right: Open `~/projects/my-app/` directly
+
+❌ **Opening just individual files**
+- Wrong: Open `my-app/src/main.ts` directly
+- Right: Open the `my-app/` folder
+
+❌ **Mixing up global and project paths**
+- Global: Always `~/.cline/` (home directory)
+- Project: Always `.clinerules/` (project root)
+
+✅ **Verify your setup:**
+- Look at VS Code's file explorer sidebar
+- For project setup: See `.clinerules/` at root level
+- For global setup: Check `~/.cline/` exists in terminal: `ls ~/.cline/`
 
 ---
 

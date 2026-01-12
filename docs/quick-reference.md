@@ -16,6 +16,35 @@ Quick answers for common tasks. Keep this handy!
 
 ---
 
+## 📂 Setup Locations
+
+| Location | Path | Purpose | Committed to Git | When to Use |
+|----------|------|---------|------------------|-------------|
+| **Project** | `.clinerules/` | Team workflows | ✅ Yes | Working with team, want to share |
+| **Global** | `~/.cline/` | Personal defaults | ❌ No | Solo dev, personal patterns |
+| **Both** | Use both | Mix of team + personal | Varies | Best of both worlds |
+
+**Quick Setup:**
+
+```bash
+# Project-specific (default)
+# Already in repo, just clone and open in VS Code
+
+# Global setup
+mkdir -p ~/.cline/workflows
+cp -r .clinerules/* ~/.cline/
+
+# Verify
+ls ~/.cline/  # Should see rules.md and workflows/
+```
+
+**How Cline finds them:**
+1. Reads global first: `~/.cline/rules.md`
+2. Then reads project: `.clinerules/rules.md`
+3. Project rules override global
+
+---
+
 ## 💬 Common Things to Say to Cline
 
 ### Starting Your Day

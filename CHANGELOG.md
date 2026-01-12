@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Documentation now shows both global and project-specific setup options
+- Added comprehensive guidance on when to use each approach (team vs solo)
+- Clarified that Cline reads global config first (`~/.cline/`), then project-specific (`.clinerules/`)
+- Project rules override global rules when both are present
+- Updated Quick Start with "Choose Your Setup" step
+- Enhanced FAQ section with setup decision guidance
+- Added setup location comparison tables in all documentation
+
+### Added
+- Mermaid diagram showing Cline's rule discovery precedence
+- Practical examples for different developer scenarios (solo, team, hybrid)
+- Global setup instructions for `~/.cline/` directory
+- Setup locations table in quick-reference.md
+- "Should I use global or project-specific setup?" FAQ entry
+
 ## [1.0.0] - 2026-01-12
 
 ### Added

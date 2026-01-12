@@ -1,4 +1,4 @@
-# Cline GitLab Feature Workflow Kit
+# Cline Development Workflow Kit with GitLab And SonarQube
 
 A minimal, **workflow-driven** setup for using Cline with:
 - GitLab Merge Requests (via local GitLab MCP)
@@ -44,7 +44,9 @@ A minimal, **workflow-driven** setup for using Cline with:
 
 ## Folder structure
 
-**Location:** All these files go in your **project root** (workspace root directory).
+### **Option A: Project-Specific Setup**
+
+All files in your **project root** (workspace root directory):
 
 ```
 your-project/              ← Open this folder in VS Code
@@ -77,7 +79,25 @@ your-project/              ← Open this folder in VS Code
 └── validate_mcp_setup.py  ← Setup validation script
 ```
 
-**💡 Tip:** When you open this folder in VS Code, Cline automatically discovers and uses `.clinerules/rules.md`.
+### **Option B: Global Setup**
+
+Files in your **home directory** (applies to all projects):
+
+```
+~/.cline/                  ← Your home directory (all platforms)
+├── rules.md               ← Global rules
+└── workflows/             ← Global workflows
+    ├── start.md
+    ├── morning.md
+    ├── eod.md
+    ├── commit.md
+    └── close.md
+```
+
+**💡 Tip:** 
+- **Project-specific**: When you open a project folder in VS Code, Cline reads `.clinerules/rules.md` from that project
+- **Global**: Cline always reads `~/.cline/rules.md` (if it exists) for all projects
+- **Both**: Use both! Project rules override global rules
 
 ## MCP servers used by this project
 
@@ -106,26 +126,65 @@ This project relies on **local MCP (Model Context Protocol) servers** so Cline c
 
 ### 0) Understanding File Locations
 
-**These files are project-specific** and go in your **workspace root**:
+You have **two setup options** for `.clinerules/`:
+
+#### **Option A: Project-Specific** (Recommended for Teams)
 ```
 your-project/                    ← Open this folder in VS Code
-├── .clinerules/                 ← Cline reads from here automatically
+├── .clinerules/                 ← Project workflows
 │   ├── rules.md
 │   └── workflows/
 ├── memory-bank/
-├── README.md
 └── ...
 ```
 
-**How Cline finds these files:**
-- When you open a project folder in VS Code, Cline automatically reads `.clinerules/rules.md` from the workspace root
-- Workflows in `.clinerules/workflows/` are available immediately
-- No manual configuration needed - just clone and use!
+**Benefits:**
+- ✅ Committed to git → entire team uses same workflows
+- ✅ Customized per project → different projects can have different processes
+- ✅ Version controlled → changes are tracked
+- ✅ Great for team collaboration
 
-**Why project-specific?**
-- Committed to git → entire team uses same workflows
-- Customized per project → different projects can have different processes
-- Version controlled → changes are tracked
+#### **Option B: Global** (Personal Defaults)
+```
+~/.cline/                        ← Your home directory (all platforms)
+├── rules.md                     ← Global rules
+└── workflows/                   ← Global workflows
+    ├── morning.md
+    ├── eod.md
+    └── ...
+```
+
+**Benefits:**
+- ✅ Applies to all your projects automatically
+- ✅ Personal productivity patterns
+- ✅ No setup needed per project
+- ✅ Great for solo developers
+
+#### **Which Should You Use?**
+
+| Use Case | Recommendation |
+|----------|---------------|
+| Working with a team | Project-specific (Option A) |
+| Solo developer | Global (Option B) or Project-specific |
+| Want to share workflows | Project-specific (commit to git) |
+| Personal patterns across all projects | Global (Option B) |
+| Mix of both | Both! (project overrides global) |
+
+#### **How Cline Discovers Rules**
+
+```mermaid
+flowchart TD
+    Start[Cline Starts] --> CheckGlobal{Global rules exist?}
+    CheckGlobal -->|Yes| LoadGlobal[Load ~/.cline/rules.md]
+    CheckGlobal -->|No| CheckProject
+    LoadGlobal --> CheckProject{Project rules exist?}
+    CheckProject -->|Yes| LoadProject[Load .clinerules/rules.md]
+    CheckProject -->|No| Done[Use loaded rules]
+    LoadProject --> Override[Project rules override global]
+    Override --> Done
+```
+
+**Key Point:** Cline reads global first (`~/.cline/`), then project-specific (`.clinerules/`). Project rules override global rules.
 
 ### 1) Clone the repository
 ```bash
@@ -136,6 +195,37 @@ cd <your-repo>
 # IMPORTANT: Open this directory in VS Code
 # Cline will automatically find .clinerules/ here
 ```
+
+### 1.5) Choose Your Setup Approach
+
+**Quick Decision Guide:**
+
+Answer these questions:
+1. Are you working with a team? **→ Use Project-Specific (Option A)**
+2. Do you want to share these workflows? **→ Use Project-Specific (Option A)**
+3. Are you a solo developer? **→ Use Global (Option B) or Project-Specific**
+4. Want workflows across all your projects? **→ Use Global (Option B)**
+
+**If using Global setup (Option B):**
+```bash
+# Create global Cline directory
+mkdir -p ~/.cline/workflows
+
+# Copy workflows to global location
+cp -r .clinerules/* ~/.cline/
+
+# Copy memory-bank template (optional)
+cp -r memory-bank ~/.cline/
+```
+
+**If using Project-Specific (Option A):**
+- Skip the above - files are already in the project!
+- Continue with the steps below
+
+**Using Both?**
+- Keep common patterns in `~/.cline/` (global)
+- Keep project-specific rules in `.clinerules/` (project)
+- Project rules will override global rules
 
 ### 2) Create and activate a virtual environment (recommended)
 ```bash
@@ -381,20 +471,51 @@ When a thread is remediated, reply with:
 
 ### "Where do these files go?"
 
-**These files belong in your project's workspace root:**
+**You have two options:**
+
+**Option A: Project-Specific** (in your project folder)
 ```
 your-project/          ← Open THIS folder in VS Code
-├── .clinerules/       ← Must be at root level
+├── .clinerules/       ← Project workflows
 ├── memory-bank/
 └── ...
 ```
 
-**Cline automatically reads `.clinerules/rules.md` when you open the workspace.**
+**Option B: Global** (in your home directory)
+```
+~/.cline/              ← Applies to all projects
+├── rules.md
+└── workflows/
+```
+
+**Cline reads global first, then project-specific. Project rules override global.**
 
 **Not working?**
-- Check VS Code's file explorer - is `.clinerules/` at the top level?
+- **Project setup:** Check VS Code's file explorer - is `.clinerules/` at the top level?
+- **Global setup:** Check `~/.cline/` exists in your home directory
 - Did you open the project **folder**, not a subdirectory?
-- Try restarting VS Code after cloning
+- Try restarting VS Code after setup
+
+### "Should I use global or project-specific setup?"
+
+**Use Project-Specific if:**
+- ✅ You're working with a team
+- ✅ You want to share workflows (commit to git)
+- ✅ Different projects need different workflows
+- ✅ You want version control for workflow changes
+
+**Use Global if:**
+- ✅ You're a solo developer
+- ✅ You want the same workflows across all projects
+- ✅ You have personal productivity patterns
+- ✅ You don't want to set up per project
+
+**Use Both if:**
+- ✅ You want global defaults with project-specific overrides
+- ✅ You have common patterns + project-specific rules
+- ✅ You want flexibility
+
+**Pro tip:** Start with global for personal use, add project-specific when working with teams.
 
 ### "How do I talk to Cline?"
 
