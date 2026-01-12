@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - FAQ with 10+ common questions and solutions
   - Public release checklist
 
-- **user-guide.md** - Comprehensive beginner walkthrough (595 lines)
+- **USER_GUIDE.md** - Comprehensive beginner walkthrough (595 lines)
   - "What is This?" explanation for AI assistant newcomers
   - "How to Talk to Cline" with three invocation methods
   - Complete first feature walkthrough (day-by-day)

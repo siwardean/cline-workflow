@@ -34,10 +34,42 @@ You work **with an AI pair programmer** that:
 
 ---
 
+## 📂 Where Do These Files Go?
+
+**IMPORTANT:** These files go in your **project root** (workspace root):
+
+```
+your-project/                    ← Open THIS folder in VS Code
+├── .clinerules/                 ← Cline reads automatically
+│   ├── rules.md                 ← Workspace rules
+│   └── workflows/               ← Your workflows
+│       ├── morning.md
+│       ├── eod.md
+│       └── ...
+├── memory-bank/                 ← Project state
+│   ├── current-mr.md
+│   └── ...
+├── README.md
+└── ...
+```
+
+**How it works:**
+1. You open the project folder in VS Code (File → Open Folder)
+2. Cline automatically discovers `.clinerules/rules.md` in the workspace root
+3. Workflows become available immediately
+4. No configuration needed!
+
+**Common mistake:**
+- ❌ Opening a parent directory that contains your project
+- ❌ Opening just individual files
+- ✅ Opening the actual project folder where `.clinerules/` exists
+
+---
+
 ## How to Talk to Cline
 
 ### Opening Cline
-1. Open Cursor IDE
+1. Open VS Code IDE
 2. Look for the **Cline** icon in the left sidebar (or press `Ctrl/Cmd + Shift + P` and type "Cline")
 3. The Cline chat window opens on the right
 

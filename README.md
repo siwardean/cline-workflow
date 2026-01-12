@@ -26,7 +26,7 @@ A minimal, **workflow-driven** setup for using Cline with:
 ### 📚 Learning Resources
 
 **Start here:**
-- **[User Guide](user-guide.md)** - Step-by-step walkthrough of your first feature (15 min read)
+- **[User Guide](USER_GUIDE.md)** - Step-by-step walkthrough of your first feature (15 min read)
 - **[Quick Reference](docs/quick-reference.md)** - Cheat sheet for common tasks (keep it handy!)
 - **[Workflow Examples](docs/workflow-examples.md)** - See real examples of each workflow in action
 
@@ -44,26 +44,40 @@ A minimal, **workflow-driven** setup for using Cline with:
 
 ## Folder structure
 
-```
-.clinerules/
-  rules.md
-  workflows/
-    start.md       # Start a new feature from user story
-    morning.md     # Daily status check (threads, SonarQube, pipeline)
-    eod.md         # Update MR & draft reviewer replies
-    commit.md      # Stage, test, commit with conventional message
-    close.md       # Post-merge retrospective
+**Location:** All these files go in your **project root** (workspace root directory).
 
-memory-bank/
-  current-mr.md    # Your project configuration (update this first!)
-  handover.md      # Daily progress tracker
-  story.md         # Feature plan
-  retro.md         # Retrospective after merge
-
-docs/
-  quick-reference.md    # Cheat sheet for common tasks
-  workflow-examples.md  # Real examples of each workflow
 ```
+your-project/              ← Open this folder in VS Code
+├── .clinerules/           ← Cline reads automatically from here
+│   ├── rules.md           ← Workspace rules & standards
+│   └── workflows/
+│       ├── start.md       # Start a new feature from user story
+│       ├── morning.md     # Daily status check (threads, SonarQube, pipeline)
+│       ├── eod.md         # Update MR & draft reviewer replies
+│       ├── commit.md      # Stage, test, commit with conventional message
+│       └── close.md       # Post-merge retrospective
+│
+├── memory-bank/           ← Project state & configuration
+│   ├── current-mr.md      # Your project configuration (update this first!)
+│   ├── handover.md        # Daily progress tracker
+│   ├── story.md           # Feature plan
+│   └── retro.md           # Retrospective after merge
+│
+├── docs/                  ← Reference documentation
+│   ├── quick-reference.md    # Cheat sheet for common tasks
+│   └── workflow-examples.md  # Real examples of each workflow
+│
+├── .gitlab/
+│   └── merge_request_templates/
+│       └── default.md     # MR description template
+│
+├── README.md              ← You are here
+├── USER_GUIDE.md          ← Start here for beginners
+├── CHANGELOG.md           ← Release notes
+└── validate_mcp_setup.py  ← Setup validation script
+```
+
+**💡 Tip:** When you open this folder in VS Code, Cline automatically discovers and uses `.clinerules/rules.md`.
 
 ## MCP servers used by this project
 
@@ -90,11 +104,37 @@ This project relies on **local MCP (Model Context Protocol) servers** so Cline c
 
 ## 🚀 Quick Start (5 minutes)
 
+### 0) Understanding File Locations
+
+**These files are project-specific** and go in your **workspace root**:
+```
+your-project/                    ← Open this folder in VS Code
+├── .clinerules/                 ← Cline reads from here automatically
+│   ├── rules.md
+│   └── workflows/
+├── memory-bank/
+├── README.md
+└── ...
+```
+
+**How Cline finds these files:**
+- When you open a project folder in VS Code, Cline automatically reads `.clinerules/rules.md` from the workspace root
+- Workflows in `.clinerules/workflows/` are available immediately
+- No manual configuration needed - just clone and use!
+
+**Why project-specific?**
+- Committed to git → entire team uses same workflows
+- Customized per project → different projects can have different processes
+- Version controlled → changes are tracked
+
 ### 1) Clone the repository
 ```bash
 # Clone from your GitLab/GitHub instance
 git clone https://gitlab.company.tld/<your-org>/<your-repo>.git
 cd <your-repo>
+
+# IMPORTANT: Open this directory in VS Code
+# Cline will automatically find .clinerules/ here
 ```
 
 ### 2) Create and activate a virtual environment (recommended)
@@ -175,13 +215,20 @@ This checks:
 - GitLab/SonarQube environment variables (if running in Cline)
 
 ### 8) Run your first workflow
+
+**Make sure you've opened the project folder in VS Code** (not just individual files).
+
 In Cline, run:
-
 ```
-/morning.md
+Run the morning.md workflow
 ```
 
-If you see MR thread summaries and quality signals → you're ready.
+If you see MR thread summaries and quality signals → you're ready!
+
+**Troubleshooting:**
+- ❌ "Cline can't find the workflow" → Check that `.clinerules/` is in your workspace root
+- ❌ "Rules not being followed" → Verify you opened the **project folder** in VS Code, not a parent directory
+- ✅ Check: Look at VS Code's sidebar - you should see `.clinerules/` folder at the root level
 
 ---
 
@@ -247,7 +294,7 @@ Ready to start with Thread #1?
 
 **You:** `Perfect! Run the commit.md workflow`
 
-**See? Easy!** Check [user-guide.md](user-guide.md) for complete walkthroughs.
+**See? Easy!** Check [USER_GUIDE.md](USER_GUIDE.md) for complete walkthroughs.
 
 ---
 
@@ -332,6 +379,23 @@ When a thread is remediated, reply with:
 
 ## ❓ FAQ & Troubleshooting
 
+### "Where do these files go?"
+
+**These files belong in your project's workspace root:**
+```
+your-project/          ← Open THIS folder in VS Code
+├── .clinerules/       ← Must be at root level
+├── memory-bank/
+└── ...
+```
+
+**Cline automatically reads `.clinerules/rules.md` when you open the workspace.**
+
+**Not working?**
+- Check VS Code's file explorer - is `.clinerules/` at the top level?
+- Did you open the project **folder**, not a subdirectory?
+- Try restarting VS Code after cloning
+
 ### "How do I talk to Cline?"
 
 Just type naturally in the Cline chat window:
@@ -385,7 +449,7 @@ git restore <filename>
 
 ### "Where can I learn more?"
 
-- **[User Guide](user-guide.md)** - Complete walkthrough with examples
+- **[User Guide](USER_GUIDE.md)** - Complete walkthrough with examples
 - **[Quick Reference](docs/quick-reference.md)** - Cheat sheet
 - **[Workflow Examples](docs/workflow-examples.md)** - Real scenario examples
 
@@ -408,7 +472,7 @@ Cline can explain itself and help you get unstuck!
 
 ### Documentation
 - [ ] README includes Quick Start + MCP setup + workflow overview + beginner section
-- [ ] User guide with step-by-step examples (`user-guide.md`)
+- [ ] User guide with step-by-step examples (`USER_GUIDE.md`)
 - [ ] Quick reference cheat sheet (`docs/quick-reference.md`)
 - [ ] Workflow examples with real scenarios (`docs/workflow-examples.md`)
 - [ ] No internal URLs or tokens
@@ -443,7 +507,7 @@ Cline can explain itself and help you get unstuck!
 ## 🤝 Getting Help & Contributing
 
 ### New to this?
-Start with [user-guide.md](user-guide.md) - it walks you through everything step-by-step!
+Start with [USER_GUIDE.md](USER_GUIDE.md) - it walks you through everything step-by-step!
 
 ### Quick help
 - **[Quick Reference](docs/quick-reference.md)** - Cheat sheet for common tasks
