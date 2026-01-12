@@ -133,13 +133,227 @@ You should see status for **all your MRs**, including threads, pipeline status, 
 
 ## 📋 Available Workflows
 
-| Workflow | Command | What it does |
-|----------|---------|--------------|
-| **morning.md** | `Run the morning.md workflow` | Check status across **ALL MRs**, threads, SonarQube |
-| **eod.md** | `Run the eod.md workflow` | Update selected MR(s), draft replies, write handover |
-| **commit.md** | `Run the commit.md workflow` | Stage, test, propose commit message |
-| **start.md** | `Run the start.md workflow` | Create plan from user story |
-| **close.md** | `Run the close.md workflow` | Write retrospective after merge |
+### **start.md** - Feature Planning
+**When**: Beginning of a new feature  
+**Input**: User story (you paste it in chat)  
+**What it does:**
+- ✅ Reads your Rally/Jira story
+- ✅ Searches codebase for relevant files
+- ✅ Creates execution plan with tasks mapped to acceptance criteria
+- ✅ Writes plan to `memory-bank/story.md`
+
+**What it does NOT do:**
+- ❌ Does NOT create git branch (you create it manually)
+- ❌ Does NOT create GitLab MR (you create it manually)
+- ❌ Does NOT write code
+
+**Output**: `memory-bank/story.md` with detailed task plan
+
+---
+
+### **morning.md** - Daily Status Check
+**When**: Start of your workday  
+**Input**: None (reads from `memory-bank/current-mr.md`)  
+**What it does:**
+- ✅ Fetches status for **ALL MRs** in your project
+- ✅ Reads GitLab threads, pipeline status for each MR
+- ✅ Fetches SonarQube quality gate, coverage, issues
+- ✅ Prioritizes work across all MRs
+- ✅ Suggests which MR to focus on
+
+**What it does NOT do:**
+- ❌ Does NOT modify any files
+- ❌ Does NOT update GitLab
+- ❌ Does NOT write code
+
+**Output**: Status report in chat with prioritized task list
+
+---
+
+### **eod.md** - End of Day Update
+**When**: Before you finish for the day  
+**Input**: None (reads config, asks which MR to update)  
+**What it does:**
+- ✅ Shows all your active MRs
+- ✅ Asks you which MR(s) to update
+- ✅ Fetches latest SonarQube results
+- ✅ Updates GitLab MR description (using MR template)
+- ✅ Drafts replies to resolved reviewer threads (you copy/paste to GitLab)
+- ✅ Updates `memory-bank/handover.md` with progress
+
+**What it does NOT do:**
+- ❌ Does NOT post replies to GitLab (shows drafts for you to post)
+- ❌ Does NOT resolve threads
+- ❌ Does NOT merge anything
+
+**Output**: 
+- Updated MR description on GitLab
+- Draft thread replies (in chat, ready to copy)
+- Updated `memory-bank/handover.md`
+
+---
+
+### **commit.md** - Commit Helper
+**When**: After you've made code changes  
+**Input**: Your code changes (staged or unstaged)  
+**What it does:**
+- ✅ Shows `git status` and `git diff`
+- ✅ Stages changes (with your confirmation)
+- ✅ Runs pre-commit hooks (lint, tests)
+- ✅ Auto-fixes linting errors if possible
+- ✅ Proposes Angular Conventional Commit message
+- ✅ Commits **only after you approve**
+- ✅ Pushes to remote
+
+**What it does NOT do:**
+- ❌ Does NOT commit without approval
+- ❌ Does NOT write code
+- ❌ Does NOT merge branches
+
+**Output**: Committed and pushed changes with proper commit message
+
+---
+
+### **close.md** - Post-Merge Retrospective
+**When**: After your MR is merged  
+**Input**: None (reads merged MR data)  
+**What it does:**
+- ✅ Fetches merged MR metadata from GitLab
+- ✅ Analyzes what changed vs original plan
+- ✅ Evaluates acceptance criteria compliance
+- ✅ Compares estimate vs actual time
+- ✅ Identifies lessons learned
+- ✅ Writes retrospective to `memory-bank/retro.md`
+
+**What it does NOT do:**
+- ❌ Does NOT merge the MR (you do that in GitLab)
+- ❌ Does NOT modify code
+- ❌ Does NOT update GitLab
+
+**Output**: `memory-bank/retro.md` with detailed retrospective
+
+---
+
+## 🔄 Complete Feature Lifecycle (What YOU Do vs What CLINE Does)
+
+### **Phase 1: Setup** (You)
+```bash
+# 1. Create your feature branch
+git checkout -b feature/password-strength
+
+# 2. Make initial commit
+git commit --allow-empty -m "feat: initialize password strength feature"
+git push -u origin feature/password-strength
+
+# 3. Create MR in GitLab (via GitLab UI)
+#    - Go to GitLab → Merge Requests → New
+#    - Source: feature/password-strength
+#    - Target: main
+#    - Note the MR IID (e.g., !67)
+
+# 4. Add MR to config
+# Edit memory-bank/current-mr.md, add to merge_requests:
+#   - mr_iid: 67
+#     feature_branch: feature/password-strength
+#     description: "Password strength validator"
+```
+
+### **Phase 2: Planning** (Cline Helps)
+```
+You: Run the start.md workflow
+
+[Paste your user story]
+
+Cline: 
+- ✅ Searches codebase
+- ✅ Creates execution plan
+- ✅ Writes memory-bank/story.md
+
+Output: Detailed plan with tasks, tests, files to modify
+```
+
+### **Phase 3: Development** (You + Cline)
+```
+You: Let's implement Task 1 - password validation function
+
+Cline:
+- ✅ Writes code
+- ✅ Creates tests
+- ✅ Shows you the implementation
+
+You: [Review, provide feedback]
+
+You: Run the commit.md workflow
+
+Cline:
+- ✅ Shows diff
+- ✅ Runs tests/lint
+- ✅ Proposes commit message
+- ❓ Asks for approval
+
+You: Approve
+
+Cline:
+- ✅ Commits
+- ✅ Pushes
+```
+
+### **Phase 4: Daily Maintenance** (Cline Automates)
+```
+Morning:
+You: Run the morning.md workflow
+
+Cline:
+- ✅ Shows status of ALL your MRs
+- ✅ Lists reviewer threads
+- ✅ Shows SonarQube issues
+- ✅ Suggests priorities
+
+Evening:
+You: Run the eod.md workflow
+
+Cline:
+- ✅ Asks which MR to update
+- ✅ Updates MR description
+- ✅ Drafts thread replies
+- ✅ Updates handover
+
+You: [Copy/paste replies to GitLab]
+```
+
+### **Phase 5: Merge & Close** (You + Cline)
+```
+You: [Merge MR in GitLab UI after approvals]
+
+You: Run the close.md workflow
+
+Cline:
+- ✅ Analyzes what was delivered
+- ✅ Compares to original plan
+- ✅ Calculates time variance
+- ✅ Writes retrospective
+
+Output: memory-bank/retro.md with lessons learned
+```
+
+---
+
+## 🎯 Quick Summary
+
+| Action | Who Does It |
+|--------|-------------|
+| Create branch | **YOU** (`git checkout -b`) |
+| Create MR | **YOU** (GitLab UI) |
+| Plan feature | **CLINE** (start.md) |
+| Write code | **YOU + CLINE** (pair programming) |
+| Commit code | **CLINE** (commit.md, with your approval) |
+| Check status | **CLINE** (morning.md) |
+| Update MR | **CLINE** (eod.md, updates description) |
+| Post thread replies | **YOU** (copy drafts from Cline) |
+| Merge MR | **YOU** (GitLab UI) |
+| Write retro | **CLINE** (close.md) |
+
+**Bottom line:** Workflows automate the tedious stuff (status checks, MR updates, commit messages, retros). You stay in control of code, branches, and merging.
 
 ---
 

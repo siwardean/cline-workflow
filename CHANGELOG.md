@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Comprehensive workflow documentation**: Clear Input/Output specs for all workflows
+- **Feature lifecycle diagram**: Shows what YOU do vs what CLINE does
+- **Clarified workflow responsibilities**: What each workflow creates, modifies, or expects
 - **Multi-MR support**: Track and manage multiple merge requests in one project
   - Updated `memory-bank/current-mr.md` with `merge_requests` list (array of MRs)
   - Morning workflow now shows status across ALL your MRs

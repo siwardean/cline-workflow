@@ -1,14 +1,35 @@
-# /eod.md — End of Day MR Update
+# /eod.md — End of Day MR Update (Multi-MR Support)
 
-## Objective
-Before ending the workday:
-- Update MR description with latest status
-- Draft replies to resolved reviewer threads
-- Document progress in handover
+## What This Workflow Does
+
+**Updates selected MR(s) on GitLab and drafts replies to reviewer threads.**
+
+### ✅ DOES:
+- Lists all your active MRs
+- Asks which MR(s) to update
+- Fetches latest SonarQube status
+- Updates GitLab MR description (fills template)
+- Drafts professional replies to resolved threads
+- Updates `memory-bank/handover.md` with progress
+
+### ❌ DOES NOT:
+- Does NOT post replies to GitLab (shows drafts to copy/paste)
+- Does NOT resolve threads
+- Does NOT merge MRs
+- Does NOT write code
 
 ## Prerequisites
-- `memory-bank/current-mr.md` configured
-- `.gitlab/merge_request_templates/default.md` exists
+- `memory-bank/current-mr.md` configured with merge_requests list
+- `.gitlab/merge_request_templates/default_merge_request.md` exists
+- MRs already created in GitLab
+
+## Input
+- Your selection of which MR(s) to update
+
+## Output
+- Updated MR description(s) on GitLab
+- Draft thread replies in chat (copy/paste ready)
+- Updated `memory-bank/handover.md`
 
 ## Steps (tool-first)
 

@@ -1,13 +1,33 @@
-# /morning.md — Daily Status & Planning (Multi-MR Support)
+# /morning.md — Daily Status Check (Multi-MR Support)
 
-## Objective
-Start the day with a comprehensive status check across ALL your merge requests:
-- Review MR threads and pipeline status for each MR
-- Check SonarQube quality metrics
-- Identify priorities for today
+## What This Workflow Does
+
+**Checks status across ALL your merge requests and provides prioritized task list.**
+
+### ✅ DOES:
+- Fetches GitLab data for ALL MRs (threads, pipeline status)
+- Fetches SonarQube metrics (quality gate, coverage, issues)
+- Prioritizes work based on severity
+- Suggests which MR to focus on first
+
+### ❌ DOES NOT:
+- Does NOT modify any files
+- Does NOT update GitLab
+- Does NOT write code
+- Does NOT commit anything
 
 ## Prerequisites
 - `memory-bank/current-mr.md` configured with project_id, merge_requests list, sonar_project_key
+- MRs already created in GitLab
+- MCP servers configured
+
+## Input
+- None (reads from `memory-bank/current-mr.md`)
+
+## Output
+- Status report in chat showing all MRs
+- Prioritized task list
+- Suggested focus area
 
 ## Steps (tool-first)
 

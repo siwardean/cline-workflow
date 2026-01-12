@@ -1,11 +1,37 @@
-# /commit.md — Commit Agent (Conventional Commits + pre-commit)
+# /commit.md — Commit Helper (Conventional Commits + Hooks)
 
-## Objective
-Prepare a clean commit by:
-- ensuring the right changes are staged
-- running pre-commit hooks / lint-staged
-- proposing the best Angular Conventional Commit message
-- committing + pushing ONLY after user approval
+## What This Workflow Does
+
+**Helps you make clean, professional commits with proper messages.**
+
+### ✅ DOES:
+- Shows `git status` and `git diff` of your changes
+- Stages changes (with your confirmation)
+- Runs pre-commit hooks (lint-staged, pre-commit)
+- Auto-fixes linting errors when possible
+- Proposes Angular Conventional Commit message (type, scope, subject)
+- Commits **only after you explicitly approve**
+- Pushes to remote branch
+
+### ❌ DOES NOT:
+- Does NOT write code
+- Does NOT create branches
+- Does NOT merge branches
+- Does NOT commit without your approval
+- Does NOT create MRs
+
+## Prerequisites
+- Git repository initialized
+- Changes made to files (either staged or unstaged)
+- Remote branch exists (or will create on first push)
+
+## Input
+- Your code changes (modified files)
+- Your approval to commit
+
+## Output
+- Committed changes with proper conventional commit message
+- Pushed to remote branch
 
 ## Steps
 1) Facts:

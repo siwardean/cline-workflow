@@ -1,14 +1,27 @@
-# /start.md — Start Feature (manual Rally story input)
+# /start.md — Feature Planning (Rally Story → Execution Plan)
 
-## Objective
-Turn a **Rally user story** (provided manually) into an execution plan aligned with:
-- Description / Notes
-- Acceptance Criteria
-- Estimate (man-days)
-- Clean Code + Tests/Coverage + SonarQube quality gates
+## What This Workflow Does
 
-## Inputs (you provide in chat)
-Paste the Rally story in this format:
+**Creates a detailed execution plan from your user story.**
+
+### ✅ DOES:
+- Reads Rally/Jira user story (you paste in chat)
+- Searches codebase for relevant code
+- Creates 5-12 task plan mapped to acceptance criteria
+- Writes plan to `memory-bank/story.md`
+
+### ❌ DOES NOT:
+- Does NOT create git branch (you do this: `git checkout -b feature/name`)
+- Does NOT create GitLab MR (you do this in GitLab UI)
+- Does NOT write code
+- Does NOT modify any project files
+
+## Prerequisites
+- Git repository already initialized
+- `memory-bank/current-mr.md` exists (can be template)
+
+## Input (you provide in chat)
+Paste the Rally/Jira story in this format:
 
 - Title:
 - Description:
@@ -17,6 +30,9 @@ Paste the Rally story in this format:
   1) ...
   2) ...
 - Estimate (man-days): X
+
+## Output
+- `memory-bank/story.md` - Detailed execution plan with tasks, tests, risks
 
 ## Steps (tool-first)
 

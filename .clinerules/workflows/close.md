@@ -1,12 +1,33 @@
-# /close.md — Close Feature (post-merge critique)
+# /close.md — Post-Merge Retrospective
 
-## Objective
-After MR is merged, review delivery vs plan:
-- AC compliance + evidence
-- quality (tests, SonarQube)
-- reviewer thread handling
-- estimate (man-days) vs elapsed time to merge
-Write a retro to `memory-bank/retro.md`.
+## What This Workflow Does
+
+**Analyzes completed feature and writes lessons learned.**
+
+### ✅ DOES:
+- Fetches merged MR data from GitLab (dates, discussions)
+- Compares delivery vs original plan
+- Evaluates acceptance criteria compliance
+- Calculates estimate variance (planned vs actual)
+- Identifies lessons learned
+- Writes retrospective to `memory-bank/retro.md`
+
+### ❌ DOES NOT:
+- Does NOT merge the MR (you merge in GitLab UI)
+- Does NOT modify code
+- Does NOT update GitLab
+- Does NOT delete branches
+
+## Prerequisites
+- MR already merged in GitLab
+- `memory-bank/story.md` exists (from start.md workflow)
+- `memory-bank/current-mr.md` configured
+
+## Input
+- None (reads merged MR from GitLab)
+
+## Output
+- `memory-bank/retro.md` with detailed retrospective and lessons learned
 
 ## Steps (tool-first)
 
