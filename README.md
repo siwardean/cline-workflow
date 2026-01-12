@@ -12,24 +12,33 @@ Works with: GitLab + SonarQube + Cline (VS Code extension)
 
 ```bash
 pip install uv
+
+# Option A: From requirements.txt (recommended)
+uv pip install -r requirements.txt
+
+# Option B: Direct install
 uv pip install python-gitlab-mcp sonar-mcp
 ```
 
 ### 2) Install Workflows Globally (Recommended)
 
 ```bash
-# Clone temporarily
+# Clone the repo
 git clone https://github.com/siwardean/cline-workflow.git
 cd cline-workflow
 
-# Install globally (works for ALL projects)
+# Install MCP servers
+uv pip install -r requirements.txt
+
+# Copy workflows globally (works for ALL projects)
 mkdir -p ~/Documents/Cline/Rules
 mkdir -p ~/Documents/Cline/Workflows
 cp .clinerules/rules.md ~/Documents/Cline/Rules/
 cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
 
-# Cleanup
-cd .. && rm -rf cline-workflow
+# Done! Can delete the repo now
+cd ..
+rm -rf cline-workflow
 ```
 
 ### 3) Configure MCP Servers in VS Code

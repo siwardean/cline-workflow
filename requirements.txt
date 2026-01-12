@@ -1,0 +1,8 @@
+# Cline MCP Servers for GitLab + SonarQube Workflows
+
+# GitLab MCP - Interact with GitLab MRs, pipelines, discussions
+python-gitlab-mcp
+
+# SonarQube MCP - Check quality gates, coverage, issues
+sonar-mcp
+

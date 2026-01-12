@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `requirements.txt` file for easy MCP server installation
+
 ### Fixed
 - **BREAKING**: Renamed GitLab MR template from `default.md` to `default_merge_request.md` (correct GitLab naming)
 - **CRITICAL**: Fixed package name from `gitlab-mcp` to `python-gitlab-mcp` (correct PyPI package)
