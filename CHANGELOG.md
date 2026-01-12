@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Recommendation changed:** Global setup now recommended as default (workflows are generic/reusable)
+- Updated Quick Start to emphasize global installation first
+- Clarified that these workflows work across ANY GitLab + SonarQube project
+- Project-specific setup now positioned as optional (for customization only)
+- Updated guidance: Teams can use global setup with per-project configuration
+
 ### Fixed
 - **CRITICAL:** Corrected global Cline configuration location from `~/.cline/` to `~/Documents/Cline/`
   - Global rules location: `~/Documents/Cline/Rules/rules.md` (capital R)

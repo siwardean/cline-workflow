@@ -44,7 +44,7 @@ A minimal, **workflow-driven** setup for using Cline with:
 
 ## Folder structure
 
-### **Option A: Project-Specific Setup**
+### **Option A: Project-Specific Setup** (Optional - For Customization)
 
 All files in your **project root** (workspace root directory):
 
@@ -79,9 +79,11 @@ your-project/              ← Open this folder in VS Code
 └── validate_mcp_setup.py  ← Setup validation script
 ```
 
-### **Option B: Global Setup**
+### **Option B: Global Setup** ⭐ **Recommended**
 
 Files in your **Documents folder** (applies to all projects):
+
+**Why recommended:** These workflows are generic and work with ANY GitLab + SonarQube project.
 
 ```
 ~/Documents/Cline/         ← Your Documents/Cline folder (all platforms)
@@ -97,10 +99,15 @@ Files in your **Documents folder** (applies to all projects):
 
 **Note for Linux/WSL users:** Check `~/Cline/Rules/` if `~/Documents/Cline/` doesn't exist on your system.
 
-**💡 Tip:** 
-- **Project-specific**: When you open a project folder in VS Code, Cline reads `.clinerules/rules.md` from that project
-- **Global**: Cline always reads `~/Documents/Cline/Rules/rules.md` (if it exists) for all projects
-- **Both**: Use both! Project rules override global rules
+**💡 Recommended Setup:** 
+1. **Install workflows globally** (one-time): `~/Documents/Cline/`
+2. **Per project**: Only `memory-bank/` with config needed
+3. **Result**: Clean projects, workflows available everywhere!
+
+**How it works:**
+- **Global**: Cline reads `~/Documents/Cline/Rules/rules.md` for all projects
+- **Project-specific** (optional): Add `.clinerules/` only if you need customization
+- **Both**: Project rules override global rules when present
 
 ## MCP servers used by this project
 
@@ -131,7 +138,7 @@ This project relies on **local MCP (Model Context Protocol) servers** so Cline c
 
 You have **two setup options** for `.clinerules/`:
 
-#### **Option A: Project-Specific** (Recommended for Teams)
+#### **Option A: Project-Specific** (For Team Customization)
 ```
 your-project/                    ← Open this folder in VS Code
 ├── .clinerules/                 ← Project workflows
@@ -141,13 +148,17 @@ your-project/                    ← Open this folder in VS Code
 └── ...
 ```
 
+**When to use:**
+- Team needs customized workflows different from the generic ones
+- Team wants to ensure everyone uses identical versions
+- Project-specific rules or process variations
+
 **Benefits:**
 - ✅ Committed to git → entire team uses same workflows
-- ✅ Customized per project → different projects can have different processes
 - ✅ Version controlled → changes are tracked
-- ✅ Great for team collaboration
+- ✅ Project-specific customization possible
 
-#### **Option B: Global** (Personal Defaults)
+#### **Option B: Global** (⭐ Recommended - Reusable Across Projects)
 ```
 ~/Documents/Cline/               ← Your Documents folder (all platforms)
 ├── Rules/                       ← Global rules (note: capital R)
@@ -160,21 +171,34 @@ your-project/                    ← Open this folder in VS Code
 
 **Note for Linux/WSL users:** If `~/Documents/` doesn't exist, Cline may use `~/Cline/Rules/` instead.
 
+**Why this is recommended:**
+- ⭐ **These workflows are generic** - they work with ANY GitLab + SonarQube project
+- ⭐ **Install once, use everywhere** - no need to copy to each project
+- ⭐ **Update once, benefit everywhere** - improvements propagate to all projects
+- ⭐ **Cleaner projects** - no workflow files cluttering your repos
+
 **Benefits:**
 - ✅ Applies to all your projects automatically
-- ✅ Personal productivity patterns
-- ✅ No setup needed per project
-- ✅ Great for solo developers
+- ✅ Set up once, never repeat
+- ✅ Works for solo developers AND teams
+- ✅ Each project just needs `memory-bank/current-mr.md` configuration
 
 #### **Which Should You Use?**
 
 | Use Case | Recommendation |
 |----------|---------------|
-| Working with a team | Project-specific (Option A) |
-| Solo developer | Global (Option B) or Project-specific |
-| Want to share workflows | Project-specific (commit to git) |
-| Personal patterns across all projects | Global (Option B) |
+| **Default recommendation** | **Global (Option B)** ⭐ |
+| Generic workflows (these!) | Global (Option B) |
+| Solo developer | Global (Option B) |
+| Team using generic workflows | Global (Option B) - each dev installs |
+| Team needs customization | Project-specific (Option A) |
+| Want version-controlled workflows | Project-specific (Option A) |
 | Mix of both | Both! (project overrides global) |
+
+**💡 Recommended Approach:**
+1. **Install workflows globally** (`~/Documents/Cline/`) - one time setup
+2. **Per project:** Only add `memory-bank/current-mr.md` with project config
+3. **Customize if needed:** Add project-specific `.clinerules/` only when you need different behavior
 
 #### **How Cline Discovers Rules**
 
@@ -192,27 +216,54 @@ flowchart TD
 
 **Key Point:** Cline reads global first (`~/Documents/Cline/`), then project-specific (`.clinerules/`). Project rules override global rules.
 
-### 1) Clone the repository
+### 1) Get the workflows
+
+**Recommended: Install globally (reusable across all projects)**
 ```bash
-# Clone from your GitLab/GitHub instance
+# Clone this repository temporarily
+git clone https://github.com/siwardean/cline-workflow.git
+cd cline-workflow
+
+# Install workflows globally (one-time setup)
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
+
+# Now available for ALL your projects!
+cd ..
+rm -rf cline-workflow  # Clean up - you don't need it anymore
+```
+
+**Alternative: Project-specific (for team customization)**
+```bash
+# Clone into your project
 git clone https://gitlab.company.tld/<your-org>/<your-repo>.git
 cd <your-repo>
 
-# IMPORTANT: Open this directory in VS Code
-# Cline will automatically find .clinerules/ here
+# Workflows are in .clinerules/ - customize as needed
 ```
 
-### 1.5) Choose Your Setup Approach
+### 1.5) Setup Per Project (Quick!)
 
-**Quick Decision Guide:**
+**If you installed globally (recommended):**
 
-Answer these questions:
-1. Are you working with a team? **→ Use Project-Specific (Option A)**
-2. Do you want to share these workflows? **→ Use Project-Specific (Option A)**
-3. Are you a solo developer? **→ Use Global (Option B) or Project-Specific**
-4. Want workflows across all your projects? **→ Use Global (Option B)**
+For each GitLab project, just create the configuration:
 
-**If using Global setup (Option B):**
+```bash
+cd your-project
+
+# Create memory-bank directory (only thing needed per project!)
+mkdir -p memory-bank
+```
+
+Then create `memory-bank/current-mr.md` with your project details (see step 6).
+
+**That's it!** Workflows are already available from global installation.
+
+---
+
+**If using Project-Specific setup:**
 ```bash
 # Create global Cline directories
 mkdir -p ~/Documents/Cline/Rules
@@ -511,24 +562,25 @@ your-project/          ← Open THIS folder in VS Code
 
 ### "Should I use global or project-specific setup?"
 
-**Use Project-Specific if:**
-- ✅ You're working with a team
-- ✅ You want to share workflows (commit to git)
-- ✅ Different projects need different workflows
-- ✅ You want version control for workflow changes
+**⭐ Recommended: Global Setup**
 
-**Use Global if:**
-- ✅ You're a solo developer
-- ✅ You want the same workflows across all projects
-- ✅ You have personal productivity patterns
-- ✅ You don't want to set up per project
+These workflows are **generic** - they work with ANY GitLab + SonarQube project. Installing globally means:
+- ✅ Set up once, use everywhere
+- ✅ No workflow files in your project repos
+- ✅ Works for solo AND team environments
+- ✅ Update once, all projects benefit
 
-**Use Both if:**
-- ✅ You want global defaults with project-specific overrides
-- ✅ You have common patterns + project-specific rules
-- ✅ You want flexibility
+**Use Project-Specific only if:**
+- You need workflows different from the generic ones
+- Team requires version-controlled workflows
+- Project has unique process requirements
 
-**Pro tip:** Start with global for personal use, add project-specific when working with teams.
+**Best Practice:**
+1. **Everyone on the team** installs workflows globally (same version)
+2. **Each project** only has `memory-bank/current-mr.md` with project config
+3. **If needed** Add project-specific `.clinerules/` for customizations only
+
+**Why this works for teams:** Everyone uses the same generic workflows, but each project configures its own GitLab project ID, MR details, etc. in `memory-bank/current-mr.md`.
 
 ### "How do I talk to Cline?"
 
