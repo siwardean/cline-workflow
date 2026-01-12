@@ -71,17 +71,20 @@ your-project/                    ← Open THIS folder in VS Code
 
 ### **Option B: Global Setup** (For Solo Developers)
 
-Files go in your **home directory** (applies to ALL projects):
+Files go in your **Documents folder** (applies to ALL projects):
 
 ```
-~/.cline/                        ← Your home directory (all platforms)
-├── rules.md                     ← Global rules
-└── workflows/                   ← Global workflows
+~/Documents/Cline/               ← Your Documents/Cline folder (all platforms)
+├── Rules/                       ← Global rules (note: capital R)
+│   └── rules.md
+└── Workflows/                   ← Global workflows (note: capital W)
     ├── morning.md
     ├── eod.md
     ├── commit.md
     └── ...
 ```
+
+**Note for Linux/WSL users:** Check `~/Cline/Rules/` if `~/Documents/Cline/` doesn't exist on your system.
 
 **When to use:**
 - ✅ Solo developer
@@ -91,18 +94,23 @@ Files go in your **home directory** (applies to ALL projects):
 
 **How to set up:**
 ```bash
-# Create global Cline directory
-mkdir -p ~/.cline/workflows
+# Create global Cline directories
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
 
-# Copy workflows to global location (if you cloned this repo)
-cp -r .clinerules/* ~/.cline/
+# Copy rules to global location (if you cloned this repo)
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
 
-# Or create your own workflows there
+# Copy workflows to global location
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
+
+# Linux/WSL alternative (if Documents doesn't exist):
+# mkdir -p ~/Cline/Rules && mkdir -p ~/Cline/Workflows
 ```
 
 **How it works:**
-1. Cline automatically reads `~/.cline/rules.md` when it starts
-2. Workflows available in ALL your projects
+1. Cline automatically reads `~/Documents/Cline/Rules/rules.md` when it starts
+2. Workflows in `~/Documents/Cline/Workflows/` available in ALL your projects
 3. No per-project setup needed
 
 ### **Option C: Both!** (Hybrid Approach)
@@ -110,10 +118,11 @@ cp -r .clinerules/* ~/.cline/
 Use global for common patterns, project-specific for team workflows:
 
 ```
-~/.cline/                        ← Personal defaults
-├── rules.md                     ← Your coding standards
-└── workflows/
-    └── daily-standup.md         ← Your personal workflow
+~/Documents/Cline/               ← Personal defaults
+├── Rules/                       ← Your coding standards
+│   └── rules.md
+└── Workflows/                   ← Your personal workflows
+    └── daily-standup.md
 
 your-project/                    ← Team-specific
 ├── .clinerules/                 ← Team workflows
@@ -123,7 +132,7 @@ your-project/                    ← Team-specific
 ```
 
 **How it works:**
-1. Cline reads global first (`~/.cline/`)
+1. Cline reads global first (`~/Documents/Cline/`)
 2. Then reads project-specific (`.clinerules/`)
 3. **Project rules override global rules**
 4. You get both personal + team workflows!
@@ -137,7 +146,7 @@ your-project/                    ← Team-specific
 
 #### **"I'm the only developer"**
 → **Use Global (Option B)**
-- Set up once: `~/.cline/`
+- Set up once: `~/Documents/Cline/`
 - Works everywhere
 - No git commits needed
 
@@ -159,12 +168,19 @@ your-project/                    ← Team-specific
 #### **For Global Setup:**
 ```bash
 # Option 1: Copy from this repo
-mkdir -p ~/.cline/workflows
-cp -r .clinerules/* ~/.cline/
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
 
 # Option 2: Create from scratch
-mkdir -p ~/.cline/workflows
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
 # Then create your own rules.md and workflows
+
+# Linux/WSL alternative (if Documents doesn't exist):
+mkdir -p ~/Cline/Rules
+mkdir -p ~/Cline/Workflows
 ```
 
 #### **For Project-Specific Setup:**
@@ -188,13 +204,17 @@ mkdir -p your-project/.clinerules/workflows
 - Right: Open the `my-app/` folder
 
 ❌ **Mixing up global and project paths**
-- Global: Always `~/.cline/` (home directory)
+- Global: Always `~/Documents/Cline/` (home directory)
 - Project: Always `.clinerules/` (project root)
 
 ✅ **Verify your setup:**
 - Look at VS Code's file explorer sidebar
 - For project setup: See `.clinerules/` at root level
-- For global setup: Check `~/.cline/` exists in terminal: `ls ~/.cline/`
+- For global setup: Check directories exist in terminal:
+  ```bash
+  ls ~/Documents/Cline/Rules/     # Should show rules.md
+  ls ~/Documents/Cline/Workflows/ # Should show workflow files
+  ```
 
 ---
 

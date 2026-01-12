@@ -81,12 +81,13 @@ your-project/              ← Open this folder in VS Code
 
 ### **Option B: Global Setup**
 
-Files in your **home directory** (applies to all projects):
+Files in your **Documents folder** (applies to all projects):
 
 ```
-~/.cline/                  ← Your home directory (all platforms)
-├── rules.md               ← Global rules
-└── workflows/             ← Global workflows
+~/Documents/Cline/         ← Your Documents/Cline folder (all platforms)
+├── Rules/                 ← Global rules (note: capital R)
+│   └── rules.md
+└── Workflows/             ← Global workflows (note: capital W)
     ├── start.md
     ├── morning.md
     ├── eod.md
@@ -94,9 +95,11 @@ Files in your **home directory** (applies to all projects):
     └── close.md
 ```
 
+**Note for Linux/WSL users:** Check `~/Cline/Rules/` if `~/Documents/Cline/` doesn't exist on your system.
+
 **💡 Tip:** 
 - **Project-specific**: When you open a project folder in VS Code, Cline reads `.clinerules/rules.md` from that project
-- **Global**: Cline always reads `~/.cline/rules.md` (if it exists) for all projects
+- **Global**: Cline always reads `~/Documents/Cline/Rules/rules.md` (if it exists) for all projects
 - **Both**: Use both! Project rules override global rules
 
 ## MCP servers used by this project
@@ -146,13 +149,16 @@ your-project/                    ← Open this folder in VS Code
 
 #### **Option B: Global** (Personal Defaults)
 ```
-~/.cline/                        ← Your home directory (all platforms)
-├── rules.md                     ← Global rules
-└── workflows/                   ← Global workflows
+~/Documents/Cline/               ← Your Documents folder (all platforms)
+├── Rules/                       ← Global rules (note: capital R)
+│   └── rules.md
+└── Workflows/                   ← Global workflows (note: capital W)
     ├── morning.md
     ├── eod.md
     └── ...
 ```
+
+**Note for Linux/WSL users:** If `~/Documents/` doesn't exist, Cline may use `~/Cline/Rules/` instead.
 
 **Benefits:**
 - ✅ Applies to all your projects automatically
@@ -175,7 +181,7 @@ your-project/                    ← Open this folder in VS Code
 ```mermaid
 flowchart TD
     Start[Cline Starts] --> CheckGlobal{Global rules exist?}
-    CheckGlobal -->|Yes| LoadGlobal[Load ~/.cline/rules.md]
+    CheckGlobal -->|Yes| LoadGlobal["Load ~/Documents/Cline/Rules/rules.md"]
     CheckGlobal -->|No| CheckProject
     LoadGlobal --> CheckProject{Project rules exist?}
     CheckProject -->|Yes| LoadProject[Load .clinerules/rules.md]
@@ -184,7 +190,7 @@ flowchart TD
     Override --> Done
 ```
 
-**Key Point:** Cline reads global first (`~/.cline/`), then project-specific (`.clinerules/`). Project rules override global rules.
+**Key Point:** Cline reads global first (`~/Documents/Cline/`), then project-specific (`.clinerules/`). Project rules override global rules.
 
 ### 1) Clone the repository
 ```bash
@@ -208,14 +214,18 @@ Answer these questions:
 
 **If using Global setup (Option B):**
 ```bash
-# Create global Cline directory
-mkdir -p ~/.cline/workflows
+# Create global Cline directories
+mkdir -p ~/Documents/Cline/Rules
+mkdir -p ~/Documents/Cline/Workflows
+
+# Copy rules to global location
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
 
 # Copy workflows to global location
-cp -r .clinerules/* ~/.cline/
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
 
-# Copy memory-bank template (optional)
-cp -r memory-bank ~/.cline/
+# Linux/WSL alternative (if Documents doesn't exist):
+# mkdir -p ~/Cline/Rules && mkdir -p ~/Cline/Workflows
 ```
 
 **If using Project-Specific (Option A):**
@@ -223,7 +233,7 @@ cp -r memory-bank ~/.cline/
 - Continue with the steps below
 
 **Using Both?**
-- Keep common patterns in `~/.cline/` (global)
+- Keep common patterns in `~/Documents/Cline/` (global)
 - Keep project-specific rules in `.clinerules/` (project)
 - Project rules will override global rules
 
@@ -483,16 +493,19 @@ your-project/          ← Open THIS folder in VS Code
 
 **Option B: Global** (in your home directory)
 ```
-~/.cline/              ← Applies to all projects
-├── rules.md
-└── workflows/
+~/Documents/Cline/     ← Applies to all projects
+├── Rules/
+│   └── rules.md
+└── Workflows/
+    ├── morning.md
+    └── ...
 ```
 
 **Cline reads global first, then project-specific. Project rules override global.**
 
 **Not working?**
 - **Project setup:** Check VS Code's file explorer - is `.clinerules/` at the top level?
-- **Global setup:** Check `~/.cline/` exists in your home directory
+- **Global setup:** Check `~/Documents/Cline/Rules/` exists (or `~/Cline/Rules/` on some Linux systems)
 - Did you open the project **folder**, not a subdirectory?
 - Try restarting VS Code after setup
 

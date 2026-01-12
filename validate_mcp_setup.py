@@ -6,7 +6,7 @@ This script validates that GitLab and SonarQube MCP servers are properly
 configured and accessible. Run this before using the Cline workflows.
 
 Note: This script validates PROJECT-SPECIFIC setup (.clinerules/ in project root).
-      If you're using GLOBAL setup (~/.cline/), this script won't check those files.
+      If you're using GLOBAL setup (~/Documents/Cline/), this script won't check those files.
       Global setup is automatically discovered by Cline - no validation needed.
 
 Usage:
@@ -141,7 +141,7 @@ def validate_project_structure():
     print_header("Project Structure")
     
     print("\nNote: Validating PROJECT-SPECIFIC setup (.clinerules/ in this directory)")
-    print("If you're using global setup (~/.cline/), those files won't be checked here.\n")
+    print("If you're using global setup (~/Documents/Cline/), those files won't be checked here.\n")
     
     all_good = True
     

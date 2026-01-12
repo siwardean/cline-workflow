@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **CRITICAL:** Corrected global Cline configuration location from `~/.cline/` to `~/Documents/Cline/`
+  - Global rules location: `~/Documents/Cline/Rules/rules.md` (capital R)
+  - Global workflows location: `~/Documents/Cline/Workflows/` (capital W)
+  - Added note for Linux/WSL users about alternative `~/Cline/` location
+  - Updated all documentation, setup commands, and examples
+  - Fixed mermaid diagram with correct path
+
 ### Changed
 - Documentation now shows both global and project-specific setup options
 - Added comprehensive guidance on when to use each approach (team vs solo)
-- Clarified that Cline reads global config first (`~/.cline/`), then project-specific (`.clinerules/`)
+- Clarified that Cline reads global config first (`~/Documents/Cline/`), then project-specific (`.clinerules/`)
 - Project rules override global rules when both are present
 - Updated Quick Start with "Choose Your Setup" step
 - Enhanced FAQ section with setup decision guidance
@@ -19,9 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Mermaid diagram showing Cline's rule discovery precedence
 - Practical examples for different developer scenarios (solo, team, hybrid)
-- Global setup instructions for `~/.cline/` directory
+- Global setup instructions for `~/Documents/Cline/` directory with correct subdirectories
 - Setup locations table in quick-reference.md
 - "Should I use global or project-specific setup?" FAQ entry
+- Linux/WSL alternative path documentation
 
 ## [1.0.0] - 2026-01-12
 
