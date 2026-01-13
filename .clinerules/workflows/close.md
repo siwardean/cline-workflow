@@ -1,4 +1,9 @@
-# /close.md — Post-Merge Retrospective
+---
+name: close
+description: Write retrospective after MR merge
+---
+
+# Post-Merge Retrospective
 
 ## What This Workflow Does
 

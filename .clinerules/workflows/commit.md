@@ -1,4 +1,9 @@
-# /commit.md — Commit Helper (Conventional Commits + Hooks)
+---
+name: commit
+description: Stage, test, and commit with conventional message
+---
+
+# Commit Helper (Conventional Commits + Hooks)
 
 ## What This Workflow Does
 

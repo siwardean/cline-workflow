@@ -1,4 +1,9 @@
-# /start.md — Feature Planning (Rally Story → Execution Plan)
+---
+name: start
+description: Create execution plan from user story
+---
+
+# Feature Planning (Rally Story → Execution Plan)
 
 ## What This Workflow Does
 

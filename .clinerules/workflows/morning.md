@@ -1,4 +1,9 @@
-# /morning.md — Daily Status Check (Multi-MR Support)
+---
+name: morning
+description: Check status across all MRs, threads, and SonarQube
+---
+
+# Daily Status Check (Multi-MR Support)
 
 ## What This Workflow Does
 

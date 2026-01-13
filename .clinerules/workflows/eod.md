@@ -1,4 +1,9 @@
-# /eod.md — End of Day MR Update (Multi-MR Support)
+---
+name: eod
+description: Update MR description and draft thread replies
+---
+
+# End of Day MR Update (Multi-MR Support)
 
 ## What This Workflow Does
 
