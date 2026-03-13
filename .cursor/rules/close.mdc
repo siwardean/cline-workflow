@@ -1,0 +1,97 @@
+---
+description: Write retrospective after MR is merged. Run once the MR has been merged in GitLab.
+alwaysApply: false
+---
+
+# Post-Merge Retrospective
+
+## What This Workflow Does
+
+**Analyzes completed feature and writes lessons learned.**
+
+### ✅ DOES:
+- Fetches merged MR data from GitLab (dates, discussions)
+- Compares delivery vs original plan
+- Evaluates acceptance criteria compliance
+- Calculates estimate variance (planned vs actual)
+- Identifies lessons learned
+- Writes retrospective to `memory-bank/retro.md`
+
+### ❌ DOES NOT:
+- Does NOT merge the MR (you merge in GitLab UI)
+- Does NOT modify code
+- Does NOT update GitLab
+- Does NOT delete branches
+
+## Prerequisites
+- MR already merged in GitLab
+- `memory-bank/story.md` exists (from start workflow)
+- `memory-bank/current-mr.md` configured
+
+## Steps (tool-first)
+
+### 1) Read baseline and configuration
+Read `memory-bank/story.md` and `memory-bank/current-mr.md`.
+Extract: original plan, ACs, estimate, start date, project details.
+
+**Error handling:** If story.md missing, ask user for story details or skip detailed comparison.
+
+### 2) Fetch MR data (via GitLab MCP)
+**List MCP tools available**, then:
+
+- Fetch MR metadata (`gitlab_get_merge_request`) — extract created_at, merged_at, state
+- **Confirm state = "merged"** — if not, warn user
+- Fetch MR discussions (`gitlab_get_discussions`) — analyze threads, themes, reviewer engagement
+- Fetch final pipeline status
+
+**Error handling:** If MCP unavailable, skip GitLab analysis and note in retro.
+
+### 3) Analyze repository changes
+```
+git fetch origin
+git checkout {base_branch} && git pull origin {base_branch}
+git log --merges --grep="Merge.*{feature_branch}" --oneline -5
+git diff --name-only {base_branch}~1 {base_branch}
+git log --oneline {base_branch}~20..{base_branch} --no-merges
+```
+
+### 4) Evaluate delivery
+
+**For each Acceptance Criterion:**
+```
+AC{N}: {criteria text}
+✅ Met / ⚠️ Partially met / ❌ Not met
+
+Evidence:
+- Implementation: {file}:{function}
+- Tests: {test file}:{test name}
+- Commit: {sha}
+```
+
+**Plan vs Reality:** Compare story.md tasks against actual commits.
+
+**Time Analysis:**
+```
+Estimate: {man-days from story.md}
+Actual: {calendar days from created_at to merged_at}
+Variance: {difference} ({percentage}%)
+```
+
+**Lessons Learned:**
+- What went well
+- What could improve
+- Root causes of variance
+
+### 5) Generate recommendations
+- Process improvements for next feature
+- Technical improvements
+- Estimation improvements
+
+### 6) Write retrospective
+Write `memory-bank/retro.md` with the full analysis.
+
+## Output
+- AC compliance summary
+- Estimate vs actual
+- Lessons learned
+- Concrete improvements for next feature

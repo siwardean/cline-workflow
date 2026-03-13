@@ -1,0 +1,75 @@
+---
+description: Stage, lint, test, and commit with Angular Conventional Commit message. Run after making code changes.
+alwaysApply: false
+---
+
+# Commit Helper (Conventional Commits + Hooks)
+
+## What This Workflow Does
+
+**Helps you make clean, professional commits with proper messages.**
+
+### ✅ DOES:
+- Shows `git status` and `git diff` of your changes
+- Stages changes (with your confirmation)
+- Runs pre-commit hooks (lint-staged, pre-commit)
+- Auto-fixes linting errors when possible
+- Proposes Angular Conventional Commit message (type, scope, subject)
+- Commits **only after you explicitly approve**
+- Pushes to remote branch
+
+### ❌ DOES NOT:
+- Does NOT write code
+- Does NOT create branches
+- Does NOT merge branches
+- Does NOT commit without your approval
+- Does NOT create MRs
+
+## Steps
+
+1) **Check facts:**
+   Run `git status`, `git diff`, `git diff --staged`
+
+2) **If nothing staged:**
+   Propose staging approach (`git add <files>` or `git add -p`).
+   Stop for user confirmation before staging.
+
+3) **Once staged:**
+   Run `git diff --staged --stat` and `git diff --staged`
+
+4) **Run pre-commit hooks:**
+
+   Read `memory-bank/current-mr.md` and check `precommit_runner` field.
+
+   - `lint-staged`: run `npx lint-staged`
+   - `pre-commit`: run `pre-commit run --files {staged files}`
+   - `both`: run both
+   - `null` / not set: detect from project files (`.pre-commit-config.yaml`, `package.json`)
+
+   **Error handling:** If hooks not installed, inform user and skip.
+
+5) **If hooks fail:**
+
+   - Extract file paths and error messages
+   - Attempt auto-fix for fixable issues:
+     - ESLint: `npx eslint --fix {files}`
+     - Prettier: `npx prettier --write {files}`
+     - Black: `black {files}`
+   - For non-fixable issues: show errors and ask user
+   - Re-run hooks after fixes
+   - If still failing: ask user how to proceed
+
+6) **Propose commit message:**
+   - 1 primary + up to 2 alternatives
+   - Follow `<type>(<scope>): <subject>`
+   - Include BREAKING CHANGE footer if needed
+
+7) **Ask for explicit approval.**
+
+8) **If approved:**
+   Run `git commit -m "..."` then `git push`
+
+## Output
+- Proposed message(s)
+- Hooks run + result
+- Commands that will run if you approve

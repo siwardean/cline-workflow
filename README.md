@@ -1,8 +1,8 @@
-# Cline workflows for Agile developers
+# AI-assisted workflows for Agile developers
 
 **AI-assisted GitLab MR workflows** with automatic status checks, MR updates, and code quality tracking.
 
-Works with: GitLab + SonarQube + Cline (VS Code extension)
+Works with: GitLab + SonarQube + **Cline** · **Kilo Code** · **Cursor** · **OpenCode** (any MCP-compatible AI assistant)
 
 ---
 
@@ -13,64 +13,64 @@ The diagram below shows the **full feature lifecycle** — what you type, what C
 ```mermaid
 sequenceDiagram
     actor Dev as 👤 Developer
-    participant Cline
+    participant AI as 🤖 AI Assistant
     participant Git as 🗂️ Git (local)
     participant GL as 🦊 GitLab (MCP)
     participant SQ as 📊 SonarQube (MCP)
 
     rect rgb(230, 245, 255)
         Note over Dev,GL: 🚀 start.md — Feature kick-off
-        Dev->>Cline: Story title + Description + Acceptance Criteria
-        Cline->>Git: Explore codebase (grep, log)
-        Cline->>Cline: Generate execution plan (5-12 tasks)
+        Dev->>AI: Story title + Description + Acceptance Criteria
+        AI->>Git: Explore codebase (grep, log)
+        AI->>AI: Generate execution plan (5-12 tasks)
         Cline->>Dev: Present plan for review
-        Dev->>Cline: ✅ Approve plan (or request changes)
-        Cline->>Git: git checkout -b feature/{slug} && git push
-        Cline->>GL: Create MR (Draft, concise plan in description)
-        GL-->>Cline: MR IID
-        Cline->>Cline: Update current-mr.md & story.md
+        Dev->>AI: ✅ Approve plan (or request changes)
+        AI->>Git: git checkout -b feature/{slug} && git push
+        AI->>GL: Create MR (Draft, concise plan in description)
+        GL-->>AI: MR IID
+        AI->>AI: Update current-mr.md & story.md
         Cline->>Dev: ✅ Branch & MR ready — here are your next steps
     end
 
     rect rgb(240, 255, 240)
         Note over Dev,SQ: ☀️ morning.md — Daily stand-up check
-        Dev->>Cline: Run morning.md
-        Cline->>GL: Fetch MR status, threads, pipeline
-        Cline->>SQ: Fetch quality gate, coverage, issues
-        Cline-->>Dev: Prioritised status report across all MRs
+        Dev->>AI: Run morning.md
+        AI->>GL: Fetch MR status, threads, pipeline
+        AI->>SQ: Fetch quality gate, coverage, issues
+        AI-->>Dev: Prioritised status report across all MRs
     end
 
     rect rgb(255, 252, 230)
         Note over Dev,Git: 💻 Development loop (repeat per task)
-        Dev->>Cline: "Implement Task N: {title}"
-        Cline->>Git: Write code & tests, show diff
-        Dev->>Cline: Run commit.md
-        Cline->>Git: Stage → lint/test → propose commit message
+        Dev->>AI: "Implement Task N: {title}"
+        AI->>Git: Write code & tests, show diff
+        Dev->>AI: Run commit.md
+        AI->>Git: Stage → lint/test → propose commit message
         Cline->>Dev: ❓ Approve commit?
-        Dev->>Cline: ✅ Approve
-        Cline->>Git: git commit && git push
+        Dev->>AI: ✅ Approve
+        AI->>Git: git commit && git push
     end
 
     rect rgb(255, 240, 240)
         Note over Dev,SQ: 🌆 eod.md — End of day wrap-up
-        Dev->>Cline: Run eod.md
-        Cline->>SQ: Fetch latest metrics
-        Cline->>GL: Update MR description (from template + story plan)
-        Cline->>GL: Fetch open reviewer threads
-        Cline-->>Dev: Draft thread replies (copy-paste to GitLab) + handover.md
+        Dev->>AI: Run eod.md
+        AI->>SQ: Fetch latest metrics
+        AI->>GL: Update MR description (from template + story plan)
+        AI->>GL: Fetch open reviewer threads
+        AI-->>Dev: Draft thread replies (copy-paste to GitLab) + handover.md
     end
 
     rect rgb(245, 235, 255)
         Note over Dev,GL: ✅ close.md — Post-merge retrospective
         Dev->>GL: Merge MR in GitLab UI (after approvals)
-        Dev->>Cline: Run close.md
-        Cline->>GL: Fetch merged MR metadata
-        Cline->>Cline: Compare delivery vs original plan
-        Cline-->>Dev: Retrospective saved to memory-bank/retro.md
+        Dev->>AI: Run close.md
+        AI->>GL: Fetch merged MR metadata
+        AI->>AI: Compare delivery vs original plan
+        AI-->>Dev: Retrospective saved to memory-bank/retro.md
     end
 ```
 
-**Key insight:** You only need to provide the user story — Cline creates the branch, opens the MR, and manages all GitLab updates throughout the feature lifecycle.
+**Key insight:** You only need to provide the user story — your AI assistant creates the branch, opens the MR, and manages all GitLab updates throughout the feature lifecycle.
 
 ---
 
@@ -88,37 +88,48 @@ uv pip install -r requirements.txt
 uv pip install python-gitlab-mcp sonar-mcp
 ```
 
-### 2) Install Workflows Globally (Recommended)
+### 2) Install Workflows
+
+Clone the repo, then copy files to your AI assistant's rules directory:
 
 ```bash
-# Clone the repo
 git clone https://github.com/siwardean/cline-workflow.git
 cd cline-workflow
-
-# Install MCP servers
 uv pip install -r requirements.txt
-
-# Copy workflows globally (works for ALL projects)
-mkdir -p ~/Documents/Cline/Rules
-mkdir -p ~/Documents/Cline/Workflows
-cp .clinerules/rules.md ~/Documents/Cline/Rules/
-cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
-
-# Done! Can delete the repo now
-cd ..
-rm -rf cline-workflow
 ```
 
-### 3) Configure MCP Servers in VS Code
+**Cline** — global install (works for all projects):
+```bash
+mkdir -p ~/Documents/Cline/Rules ~/Documents/Cline/Workflows
+cp .clinerules/rules.md ~/Documents/Cline/Rules/
+cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
+```
 
-**Option A: Using Cline UI (Recommended)**
-1. Open VS Code → Cline extension
-2. Click **Settings** (gear icon) → **MCP Servers**
-3. Add servers using the UI
+**Kilo Code** — global install:
+```bash
+mkdir -p ~/Documents/KiloCode/Rules ~/Documents/KiloCode/Workflows
+cp .kilocoderules/rules.md ~/Documents/KiloCode/Rules/
+cp .kilocoderules/workflows/* ~/Documents/KiloCode/Workflows/
+```
 
-**Option B: Edit JSON Directly**
+**Cursor** — project-level (copy into each project):
+```bash
+# In your target project root:
+cp -r /path/to/cline-workflow/.cursor ./
+```
+> Cursor loads `.cursor/rules/*.mdc` automatically. No global install needed.
 
-Open Cline settings and add to `cline_mcp_settings.json`:
+**OpenCode** — project-level:
+```bash
+cp -r /path/to/cline-workflow/.clinerules ./
+```
+> OpenCode reads `.clinerules/` by default when present.
+
+After installing, you can delete the cloned repo.
+
+### 3) Configure MCP Servers
+
+The MCP JSON config block is the same across tools — only the file location differs:
 
 ```json
 {
@@ -144,11 +155,20 @@ Open Cline settings and add to `cline_mcp_settings.json`:
 }
 ```
 
+**Where to add it:**
+
+| Tool | Config location |
+|------|----------------|
+| **Cline** | VS Code → Cline extension → Settings → MCP Servers → Edit JSON (`cline_mcp_settings.json`) |
+| **Kilo Code** | VS Code → Kilo Code extension → Settings → MCP Servers → Edit JSON |
+| **Cursor** | `.cursor/mcp.json` in project root OR `~/.cursor/mcp.json` globally |
+| **OpenCode** | `~/.config/opencode/config.json` → `mcpServers` key |
+
 **Get your tokens:**
 - **GitLab**: Settings → Access Tokens → Scope: `api`
 - **SonarQube**: My Account → Security → Generate Token
 
-**⚠️ Never commit tokens!**
+**⚠️ Never commit tokens to version control!**
 
 ### 4) Configure Your Project
 
@@ -189,7 +209,7 @@ precommit_runner: null
 
 ### 5) Test It!
 
-Open your project in VS Code and say to Cline:
+Open your project and prompt your AI assistant:
 
 ```
 Run the morning.md workflow
@@ -304,7 +324,7 @@ You should see status for **all your MRs**, including threads, pipeline status, 
 
 ---
 
-## 🔄 Complete Feature Lifecycle (What YOU Do vs What CLINE Does)
+## 🔄 Complete Feature Lifecycle (What YOU Do vs What the AI Does)
 
 ### **Phase 1: Setup** (One-time per project)
 ```bash
@@ -314,13 +334,13 @@ You should see status for **all your MRs**, including threads, pipeline status, 
 #   base_branch: main
 ```
 
-That's it. **Cline handles the rest when you run start.md.**
+That's it. **Your AI assistant handles the rest when you run start.md.**
 
-### **Phase 2: Planning + Branch + MR** (Cline Does It All)
+### **Phase 2: Planning + Branch + MR** (AI Does It All)
 ```
 You: Run the start.md workflow
 
-Tell Cline:
+Tell the AI:
   Story title: "Add password strength validator"
   Description: "Users need feedback on password strength during registration"
   Acceptance Criteria:
@@ -328,14 +348,14 @@ Tell Cline:
     2. Blocks form submit if weak
     3. Works on all modern browsers
 
-Cline:
+AI:
 - ✅ Searches codebase for relevant code
 - ✅ Creates execution plan (5-12 tasks mapped to each AC)
 - ✅ Presents plan for YOUR REVIEW
 
 You: Approve the plan (or ask for changes)
 
-Cline:
+AI:
 - ✅ Creates branch: feature/add-password-strength-validator
 - ✅ Pushes branch to origin
 - ✅ Opens Draft MR on GitLab with concise plan in description
@@ -344,11 +364,11 @@ Cline:
 Output: Branch + MR ready, full plan written — no GitLab UI needed
 ```
 
-### **Phase 3: Development** (You + Cline)
+### **Phase 3: Development** (You + AI)
 ```
 You: Let's implement Task 1 - password validation function
 
-Cline:
+AI:
 - ✅ Writes code
 - ✅ Creates tests
 - ✅ Shows you the implementation
@@ -357,7 +377,7 @@ You: [Review, provide feedback]
 
 You: Run the commit.md workflow
 
-Cline:
+AI:
 - ✅ Shows diff
 - ✅ Runs tests/lint
 - ✅ Proposes commit message
@@ -365,17 +385,17 @@ Cline:
 
 You: Approve
 
-Cline:
+AI:
 - ✅ Commits
 - ✅ Pushes
 ```
 
-### **Phase 4: Daily Maintenance** (Cline Automates)
+### **Phase 4: Daily Maintenance** (AI Automates)
 ```
 Morning:
 You: Run the morning.md workflow
 
-Cline:
+AI:
 - ✅ Shows status of ALL your MRs
 - ✅ Lists reviewer threads
 - ✅ Shows SonarQube issues
@@ -384,7 +404,7 @@ Cline:
 Evening:
 You: Run the eod.md workflow
 
-Cline:
+AI:
 - ✅ Asks which MR to update
 - ✅ Updates MR description
 - ✅ Drafts thread replies
@@ -393,13 +413,13 @@ Cline:
 You: [Copy/paste replies to GitLab]
 ```
 
-### **Phase 5: Merge & Close** (You + Cline)
+### **Phase 5: Merge & Close** (You + AI)
 ```
 You: [Merge MR in GitLab UI after approvals]
 
 You: Run the close.md workflow
 
-Cline:
+AI:
 - ✅ Analyzes what was delivered
 - ✅ Compares to original plan
 - ✅ Calculates time variance
@@ -415,97 +435,113 @@ Output: memory-bank/retro.md with lessons learned
 | Action | Who Does It |
 |--------|-------------|
 | Provide story + acceptance criteria | **YOU** |
-| Plan feature | **CLINE** (start.md) |
+| Plan feature | **AI** (start.md) |
 | Review & approve the plan | **YOU** |
-| Create branch | **CLINE** (start.md, after your approval) |
-| Create MR with plan in description | **CLINE** (start.md, via GitLab MCP) |
-| Write code | **YOU + CLINE** (pair programming) |
-| Commit code | **CLINE** (commit.md, with your approval) |
-| Check daily status | **CLINE** (morning.md) |
-| Update MR description | **CLINE** (eod.md) |
-| Post thread replies | **YOU** (copy drafts from Cline) |
+| Create branch | **AI** (start.md, after your approval) |
+| Create MR with plan in description | **AI** (start.md, via GitLab MCP) |
+| Write code | **YOU + AI** (pair programming) |
+| Commit code | **AI** (commit.md, with your approval) |
+| Check daily status | **AI** (morning.md) |
+| Update MR description | **AI** (eod.md) |
+| Post thread replies | **YOU** (copy drafts from AI) |
 | Merge MR | **YOU** (GitLab UI, after approvals) |
-| Write retro | **CLINE** (close.md) |
+| Write retro | **AI** (close.md) |
 
-**Bottom line:** You provide the story and review the plan — Cline handles branch creation, MR setup, status checks, MR updates, commit messages, and retrospectives.
+**Bottom line:** You provide the story and review the plan — your AI assistant handles branch creation, MR setup, status checks, MR updates, commit messages, and retrospectives.
 
 ---
 
-## 🔄 How Cline Finds Workflows
+## 🔄 How the AI Finds Workflows
 
-```mermaid
-flowchart TD
-    Start[Cline Starts] --> CheckGlobal{Global rules exist?}
-    CheckGlobal -->|Yes| LoadGlobal["Load ~/Documents/Cline/Rules/rules.md"]
-    CheckGlobal -->|No| CheckProject
-    LoadGlobal --> CheckProject{Project rules exist?}
-    CheckProject -->|Yes| LoadProject[Load .clinerules/rules.md]
-    CheckProject -->|No| Done[Use loaded rules]
-    LoadProject --> Override[Project rules override global]
-    Override --> Done
-```
+Each tool looks for rules files in different locations. The repo ships all three:
 
-**Global Location:** `~/Documents/Cline/Rules/` and `~/Documents/Cline/Workflows/`  
-**Project Location:** `.clinerules/` (optional - for customization)
+| Tool | Project rules dir | Global rules dir |
+|------|------------------|-----------------|
+| **Cline** | `.clinerules/` | `~/Documents/Cline/Rules/` |
+| **Kilo Code** | `.kilocoderules/` | `~/Documents/KiloCode/Rules/` |
+| **Cursor** | `.cursor/rules/*.mdc` | Cursor User Settings → Rules |
+| **OpenCode** | `.clinerules/` | `~/.config/opencode/` |
+
+Project-level rules always override global rules when both exist.
 
 ---
 
 ## 🏗️ File Structure
 
-### Global Setup (Recommended)
+### Repo layout (all tools included)
 ```
-~/Documents/Cline/               ← Install once, use everywhere
-├── Rules/
-│   └── rules.md
-└── Workflows/
-    ├── morning.md
-    ├── eod.md
-    ├── commit.md
-    ├── start.md
-    └── close.md
+cline-workflow/
+├── .clinerules/                 ← Cline & OpenCode
+│   ├── rules.md
+│   └── workflows/
+│       ├── morning.md
+│       ├── eod.md
+│       ├── commit.md
+│       ├── start.md
+│       └── close.md
+├── .kilocoderules/              ← Kilo Code
+│   ├── rules.md
+│   └── workflows/
+├── .cursor/
+│   ├── rules/                   ← Cursor rules (.mdc)
+│   │   ├── rules.mdc
+│   │   ├── morning.mdc
+│   │   ├── eod.mdc
+│   │   ├── commit.mdc
+│   │   ├── start.mdc
+│   │   └── close.mdc
+│   └── mcp.json                 ← Cursor MCP config template
+└── memory-bank/
+    └── current-mr.md            ← Per-project config (all tools)
 ```
 
-### Per Project (Required)
+### Global install (Cline)
+```
+~/Documents/Cline/               ← Install once, use for all projects
+├── Rules/rules.md
+└── Workflows/*.md
+```
+
+### Global install (Kilo Code)
+```
+~/Documents/KiloCode/
+├── Rules/rules.md
+└── Workflows/*.md
+```
+
+### Per Project (Required — all tools)
 ```
 your-gitlab-project/
 └── memory-bank/
     └── current-mr.md            ← Only this file needed per project!
 ```
 
-### Optional: Project-Specific Customization
-```
-your-gitlab-project/
-├── .clinerules/                 ← Add only if you need custom workflows
-│   ├── rules.md
-│   └── workflows/
-└── memory-bank/
-    └── current-mr.md
-```
-
 ---
 
 ## 🛠️ Troubleshooting
 
-### "Cline can't find workflows"
+### "AI can't find workflows"
 
-**Check global location:**
+**Cline / Kilo Code — check global location:**
 ```bash
-ls ~/Documents/Cline/Rules/
-ls ~/Documents/Cline/Workflows/
+ls ~/Documents/Cline/Rules/      # Cline
+ls ~/Documents/KiloCode/Rules/   # Kilo Code
 ```
 
 Should see `rules.md` and workflow files. If not, reinstall (see step 2).
 
+**Cursor** — check that `.cursor/rules/*.mdc` files have `alwaysApply: true` in their frontmatter.
+
 ### "Can't access GitLab MR"
 
-1. Verify MCP configuration in Cline settings
+1. Verify MCP configuration in your AI assistant's settings
 2. Check `memory-bank/current-mr.md` has correct `project_id` and `mr_iid`
 3. Verify GitLab token has `api` scope
 4. Run: `python validate_mcp_setup.py`
 
 ### "SonarQube data not showing"
 
-1. Verify `SONAR_URL` and `SONAR_TOKEN` in Cline MCP settings
+1. Verify `SONAR_URL` and `SONAR_TOKEN` in your MCP settings
 2. Check `sonar_project_key` in `memory-bank/current-mr.md`
 3. Run: `python validate_mcp_setup.py`
 
@@ -554,8 +590,8 @@ uv pip install --upgrade python-gitlab-mcp sonar-mcp
 
 ### Using Both Global + Project-Specific
 
-**Global** (`~/Documents/Cline/`): Common workflows for all projects  
-**Project** (`.clinerules/`): Project-specific overrides
+**Global** (`~/Documents/Cline/` or `~/Documents/KiloCode/`): Common workflows for all projects
+**Project** (`.clinerules/` / `.kilocoderules/` / `.cursor/rules/`): Project-specific overrides
 
 When both exist: **Project rules override global rules**
 
@@ -618,7 +654,7 @@ MIT License - See [LICENSE](LICENSE) file
 ## 🙏 Credits
 
 Built for teams using:
-- **Cline** - AI coding assistant for VS Code
+- **Cline** · **Kilo Code** · **Cursor** · **OpenCode** - MCP-compatible AI coding assistants
 - **GitLab** - Source control & MR management
 - **SonarQube** - Code quality & security
 
