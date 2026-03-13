@@ -85,7 +85,7 @@ def test_workflow_description_consistent_across_tools(workflow):
 # memory-bank/current-mr.md references
 # ---------------------------------------------------------------------------
 
-WORKFLOWS_THAT_READ_CONFIG = ["start", "morning", "commit", "close"]
+WORKFLOWS_THAT_READ_CONFIG = ["start", "morning", "commit", "review", "close"]
 
 
 @pytest.mark.parametrize("workflow", WORKFLOWS_THAT_READ_CONFIG)
@@ -105,6 +105,7 @@ def test_workflow_references_current_mr(workflow):
 MCP_TOOL_CONTRACTS = {
     "morning": ["gitlab_get_merge_request", "gitlab_get_discussions", "gitlab_update_merge_request"],
     "commit":  ["gitlab_update_merge_request"],
+    "review":  ["gitlab_get_merge_request", "gitlab_get_discussions", "gitlab_create_discussion"],
     "close":   ["gitlab_get_merge_request", "gitlab_get_discussions"],
 }
 
