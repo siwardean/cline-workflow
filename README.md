@@ -1,4 +1,4 @@
-# AI-Assisted GitLab Workflow
+# AI-Assisted Workflows for Agile Developers
 
 Stop managing branches, MRs, and status checks manually. These AI workflows handle the entire feature lifecycle — from user story to post-merge retrospective.
 
