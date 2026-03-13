@@ -1,5 +1,6 @@
 ---
-description: Daily ritual — wraps up yesterday then starts your day with a full status check. Run at start of day.
+name: morning
+description: Daily ritual — wraps up yesterday then starts your day with a full status check
 alwaysApply: false
 ---
 

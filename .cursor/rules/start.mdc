@@ -1,5 +1,6 @@
 ---
-description: Plan a user story, then auto-create the git branch and GitLab MR. Run at start of a new feature.
+name: start
+description: Plan a user story, then auto-create the git branch and GitLab MR
 alwaysApply: false
 ---
 

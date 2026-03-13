@@ -1,5 +1,6 @@
 ---
-description: Write retrospective after MR is merged. Run once the MR has been merged in GitLab.
+name: close
+description: Write retrospective after MR merge
 alwaysApply: false
 ---
 

@@ -2,12 +2,10 @@
 """
 MCP Setup Validation Script
 
-This script validates that GitLab and SonarQube MCP servers are properly
-configured and accessible. Run this before using the Cline workflows.
+Validates that GitLab and SonarQube MCP servers are properly configured
+and that all workflow files are present for at least one supported tool.
 
-Note: This script validates PROJECT-SPECIFIC setup (.clinerules/ in project root).
-      If you're using GLOBAL setup (~/Documents/Cline/), this script won't check those files.
-      Global setup is automatically discovered by Cline - no validation needed.
+Supported tools: Claude Code, Cline, Kilo Code, Cursor, OpenCode
 
 Usage:
     python validate_mcp_setup.py
@@ -101,8 +99,9 @@ def validate_gitlab_mcp():
     
     if not any_set:
         print("\n⚠️  No GitLab environment variables detected in current shell.")
-        print("   This is expected if running outside of Cline.")
-        print("   Ensure these are configured in: Cline → MCP Servers → GitLab MCP")
+        print("   This is expected if MCP server is configured inside your AI tool.")
+        print("   Ensure GITLAB_URL, GITLAB_TOKEN, GITLAB_ALLOWED_PROJECT_IDS are set")
+        print("   in your tool's MCP server settings.")
     
     return all_good
 
@@ -130,40 +129,77 @@ def validate_sonar_mcp():
     
     if not any_set:
         print("\n⚠️  No SonarQube environment variables detected in current shell.")
-        print("   This is expected if running outside of Cline.")
-        print("   Ensure these are configured in: Cline → MCP Servers → SonarQube MCP")
+        print("   This is expected if MCP server is configured inside your AI tool.")
+        print("   Ensure SONAR_URL and SONAR_TOKEN are set in your tool's MCP settings.")
     
     return all_good
 
 
 def validate_project_structure():
-    """Validate project file structure."""
+    """Validate project file structure — checks all supported tools."""
     print_header("Project Structure")
-    
-    print("\nNote: Validating PROJECT-SPECIFIC setup (.clinerules/ in this directory)")
-    print("If you're using global setup (~/Documents/Cline/), those files won't be checked here.\n")
-    
+
     all_good = True
-    
+
+    # Workflows required for each tool (at least one tool must be fully present)
+    tool_workflow_sets = {
+        "Claude Code":  [
+            "CLAUDE.md",
+            ".claude/commands/start.md",
+            ".claude/commands/morning.md",
+            ".claude/commands/commit.md",
+            ".claude/commands/close.md",
+        ],
+        "Cline / OpenCode": [
+            ".clinerules/rules.md",
+            ".clinerules/workflows/start.md",
+            ".clinerules/workflows/morning.md",
+            ".clinerules/workflows/commit.md",
+            ".clinerules/workflows/close.md",
+        ],
+        "Kilo Code": [
+            ".kilocoderules/rules.md",
+            ".kilocoderules/workflows/start.md",
+            ".kilocoderules/workflows/morning.md",
+            ".kilocoderules/workflows/commit.md",
+            ".kilocoderules/workflows/close.md",
+        ],
+        "Cursor": [
+            ".cursor/rules/rules.mdc",
+            ".cursor/rules/start.mdc",
+            ".cursor/rules/morning.mdc",
+            ".cursor/rules/commit.mdc",
+            ".cursor/rules/close.mdc",
+        ],
+    }
+
+    tools_installed = []
+    for tool, files in tool_workflow_sets.items():
+        present = all(Path(f).exists() for f in files)
+        status = "✅" if present else "⚠️ "
+        print(f"{status} {tool}: {'installed' if present else 'not installed'}")
+        if present:
+            tools_installed.append(tool)
+
+    if not tools_installed:
+        print("\n❌ No tool workflows found. Install at least one tool's workflows.")
+        all_good = False
+    else:
+        print(f"\n✅ Workflows installed for: {', '.join(tools_installed)}")
+
+    print()
+
+    # Required project files (tool-independent)
     required_files = [
-        (".clinerules/rules.md", "Cline rules"),
-        (".clinerules/workflows/start.md", "Start workflow"),
-        (".clinerules/workflows/morning.md", "Morning workflow"),
-        (".clinerules/workflows/eod.md", "EOD workflow"),
-        (".clinerules/workflows/commit.md", "Commit workflow"),
-        (".clinerules/workflows/close.md", "Close workflow"),
         ("memory-bank/current-mr.md", "MR configuration"),
-        ("memory-bank/handover.md", "Handover template"),
-        ("memory-bank/story.md", "Story template"),
-        ("memory-bank/retro.md", "Retro template"),
         (".gitlab/merge_request_templates/default_merge_request.md", "MR template"),
         (".gitignore", "Git ignore file"),
     ]
-    
+
     for filepath, desc in required_files:
         if not check_file_exists(filepath, desc):
             all_good = False
-    
+
     return all_good
 
 
@@ -190,7 +226,7 @@ def validate_mcp_packages():
 def main():
     """Run all validation checks."""
     print("\n" + "=" * 60)
-    print("  Cline GitLab Feature Workflow Kit - MCP Validation")
+    print("  AI-Assisted Workflows — MCP Validation")
     print("=" * 60)
     
     checks = [

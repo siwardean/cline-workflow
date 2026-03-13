@@ -1,5 +1,6 @@
 ---
-description: Stage, lint, test, and commit with Angular Conventional Commit message. Run after making code changes.
+name: commit
+description: Stage, test, and commit with conventional message
 alwaysApply: false
 ---
 
