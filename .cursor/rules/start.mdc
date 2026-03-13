@@ -70,11 +70,16 @@ If the user has not already provided it, ask for:
 - **Description** — what the feature does and why it is needed
 - **Acceptance Criteria** — numbered list; at least one required
 
-Derive a branch slug from the title:
-```
-slug = title.lower().replace(' ', '-').strip('-')
-feature_branch = f"feature/{slug}"
-```
+Derive a meaningful branch slug from the title, description, and acceptance criteria:
+- Extract 2–4 keywords that best capture the *purpose* of the feature (not generic words like "add", "update", "fix", "feature", "implement")
+- Join them with underscores, all lowercase, no special characters
+- Keep it short: 3–5 words maximum
+- Format: `feature/<keyword>_<keyword>_<keyword>`
+
+Examples:
+- Story: "Allow users to reset their password via email" → `feature/password_reset_email`
+- Story: "Add pagination to the product listing page" → `feature/product_listing_pagination`
+- Story: "Integrate Stripe for subscription billing" → `feature/stripe_subscription_billing`
 
 ### 3) Ground in the codebase
 
