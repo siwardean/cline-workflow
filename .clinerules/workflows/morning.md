@@ -1,33 +1,30 @@
 ---
 name: morning
-description: Morning check-in or end-of-day wrap-up across all MRs
+description: Daily ritual — wraps up yesterday then starts your day with a full status check
 ---
 
-# Daily Workflow (Morning Check-in / End of Day)
+# Daily Ritual (Wrap Up Yesterday → Start Today)
 
 ## What This Workflow Does
 
-**Run it at the start of your day or at the end — it asks which mode you need.**
+**Runs at the start of your day. Closes out yesterday first, then gives you a fresh status for today.**
 
-### 🌅 Morning mode — DOES:
-- Reads yesterday's handover for context
-- Fetches live GitLab data for ALL MRs (threads, pipeline status)
-- Fetches SonarQube metrics (quality gate, coverage, issues)
-- Prioritizes work and suggests where to focus
+### ✅ DOES:
+1. Updates all active MR descriptions on GitLab with current state
+2. Drafts professional replies to resolved reviewer threads
+3. Writes `memory-bank/handover.md`
+4. Fetches live GitLab and SonarQube status across all MRs
+5. Delivers a prioritised task list for the day
 
-### 🌆 End of Day mode — DOES:
-- Updates selected MR description(s) on GitLab
-- Drafts professional replies to resolved reviewer threads
-- Writes `memory-bank/handover.md` for tomorrow
-
-### ❌ DOES NOT (either mode):
-- Does NOT write production code
-- Does NOT commit code changes
+### ❌ DOES NOT:
 - Does NOT post replies to GitLab (shows drafts to copy/paste)
 - Does NOT resolve threads or merge MRs
+- Does NOT write production code
+- Does NOT commit code changes
 
 ## Prerequisites
 - `memory-bank/current-mr.md` configured with `project_id`, `merge_requests`, `base_branch`, `sonar_project_key`
+- `.gitlab/merge_request_templates/default.md` exists in the project
 - MRs already created in GitLab
 - MCP servers configured
 
@@ -38,165 +35,50 @@ description: Morning check-in or end-of-day wrap-up across all MRs
 ### 1) Read configuration
 ```
 read_file: memory-bank/current-mr.md
+read_file: memory-bank/story.md (if exists)
 ```
 Extract: `project_id`, `merge_requests` (list with `mr_iid`, `feature_branch`, `description`), `base_branch`, `sonar_project_key`.
 
 **Error handling:** If file missing or required fields empty, stop and ask the user to configure it.
 
-### 2) Ask the user which mode
-```
-🌅 Morning check-in  — review status across all MRs and get a prioritised task list
-🌆 End of day        — update MR description(s), draft thread replies, write handover
-
-Which would you like? (morning / eod)
-```
-
-**Wait for user response, then follow the corresponding path below.**
-
 ---
 
-## 🌅 Morning Path
+## Phase 1 — Wrap Up Yesterday
 
-### M1) Read handover (optional context)
+### 2) Check git status
 ```
-read_file: memory-bank/handover.md (if it exists)
-```
-Check the `date` field:
-- **Dated yesterday**: extract "Current state", "Suggested next steps", "Open MR threads" — include as a **"Yesterday's context"** block in the final report.
-- **Missing or older than yesterday**: add a soft warning:
-  ```
-  ⚠️  No handover from yesterday — morning.md (eod) was not run.
-      MR description on GitLab may be stale.
-  ```
-  Then continue normally with live data.
-
-### M2) Check Git status
-```
-run_terminal_cmd: git status
-run_terminal_cmd: git log --oneline -5
-```
-Show current branch and recent commits.
-
-### M3) Fetch GitLab MR data (via MCP) — for each MR
-**List MCP tools available** to discover exact tool names.
-
-For each MR in `merge_requests`:
-- MR metadata (`gitlab_get_merge_request` with `mr_iid`)
-- MR discussions/threads (`gitlab_get_discussions` with `mr_iid`)
-- Pipeline status (`gitlab_get_pipeline` with `mr_iid`)
-
-**Error handling:** If MCP fails for any MR, note it and continue with others.
-
-### M4) Fetch SonarQube data (via MCP)
-**List MCP tools available**, then fetch:
-- Quality gate status (pass/fail + conditions)
-- Issues by severity (bugs, vulnerabilities, code smells)
-- Coverage metrics (overall % + new code %)
-
-**Error handling:** If SonarQube unavailable, proceed with GitLab data only and note limitation.
-
-### M5) Analyse and prioritise
-Cross-reference:
-- Unresolved MR threads → tasks
-- SonarQube issues → remediation work
-- Pipeline failures → fixes needed
-
-Priority matrix:
-- **High**: Quality gate blockers, security vulnerabilities, pipeline failures
-- **Medium**: Bugs, unresolved reviewer threads
-- **Low**: Code smells, minor improvements
-
-### M6) Present morning summary
-```
-🌅 Morning Status - Project: {project_id}
-
-[If handover dated yesterday]
-📓 Yesterday's context:
-  Last worked on: {current-state summary}
-  Suggested next: {suggested next steps}
-  Open threads:   {thread summary}
-
-[If handover missing or stale]
-⚠️  No handover from yesterday.
-
-📊 SonarQube:
-{quality_gate_emoji} Quality Gate: {status}
-Coverage: {coverage}% ({diff} vs base)
-Issues: {bugs} bugs, {vulns} vulnerabilities, {smells} code smells
-
-═══════════════════════════════════════════════════════
-
-📋 MR !{mr_iid}: {description}
-Branch: {feature_branch}
-Pipeline: ✅ PASSING / ❌ FAILED / 🔄 RUNNING
-💬 Threads: {count} unresolved
-Priority: HIGH / MEDIUM / LOW
-
-[Repeat for each MR]
-
-═══════════════════════════════════════════════════════
-
-🎯 Overall Priorities:
-1. [Highest priority]
-2. [Second priority]
-3. [Third priority]
-
-💡 Suggested Focus: Start with MR !{mr_iid} ({reason})
+run_terminal_cmd: git log --oneline -10
+run_terminal_cmd: git diff --stat origin/{base_branch}...HEAD
 ```
 
----
-
-## 🌆 End of Day Path
-
-### E1) Read context and list MRs
-```
-read_file: memory-bank/story.md (if exists)
-```
-
-Show user all active MRs and ask which to update:
-```
-Your active MRs:
-1. !{mr_iid} - {feature_branch}: "{description}"
-...
-
-Which MR(s) would you like to update? (enter number, or 'all')
-```
-**Wait for user selection before proceeding.**
-
-### E2) Fetch SonarQube status (via MCP)
+### 3) Fetch SonarQube status (via MCP)
 **List MCP tools available**, then fetch:
 - Quality gate status (PASS/FAIL + reason)
 - Coverage metrics (% + diff)
 - New issues introduced (bugs, vulnerabilities, code smells)
 - Security hotspots
 
-**Error handling:** If SonarQube unavailable, note it in the MR update and proceed.
+**Error handling:** If SonarQube unavailable, note it in MR updates and proceed.
 
-### E3) Check git status
-```
-run_terminal_cmd: git log --oneline -10
-run_terminal_cmd: git diff --stat origin/{base_branch}...HEAD
-```
-
-### E4) Update MR description (via GitLab MCP)
+### 4) Update MR descriptions (via GitLab MCP) — all active MRs
 Read the MR template:
 ```
 read_file: .gitlab/merge_request_templates/default.md
 ```
 
-Fill in the template with:
+For each MR in `merge_requests`, fill in the template with:
 - Summary: from `story.md` or current MR description
 - Proposed changes: from git log and story plan
 - Risk and limitations: from SonarQube issues
 - How to test: from `story.md` test plan
 - Proof: SonarQube quality gate, coverage, pipeline status, test results
 
-Update MR description using GitLab MCP (`gitlab_update_merge_request` or equivalent).
+Update each MR description using GitLab MCP (`gitlab_update_merge_request` or equivalent).
 
-**Error handling:** If MCP update fails, show the filled template for manual copy.
+**Error handling:** If MCP update fails for any MR, show the filled template for manual copy and continue with the next.
 
-### E5) Draft replies to resolved threads (via GitLab MCP)
-Fetch MR discussions. For each thread that was opened by a reviewer, addressed in recent commits, and not yet resolved, draft:
+### 5) Draft replies to resolved threads (via GitLab MCP)
+For each MR, fetch discussions. For each thread that was opened by a reviewer, addressed in recent commits, and not yet resolved, draft:
 ```
 Thanks for the feedback! I've addressed this.
 
@@ -211,27 +93,26 @@ Evidence:
 Can you verify and resolve the thread?
 ```
 
-**Present drafts to user** for review and manual posting.
+Collect all drafts — they will be shown at the end.
 
-### E6) Write handover
+### 6) Write handover
 ```
-read_file: memory-bank/handover.md (previous state)
-run_terminal_cmd: git log --oneline --since="8 hours ago"
+run_terminal_cmd: git log --oneline --since="24 hours ago"
 run_terminal_cmd: git rev-parse HEAD
 ```
 
 Write `memory-bank/handover.md`:
 ```markdown
 # Handover (latest)
-<!-- Updated by morning.md (eod mode) -->
+<!-- Updated by morning.md -->
 
 date: {today}
 branch: {feature_branch}
 base: {base_branch}
 last_checkpoint_commit: {sha}
 
-## What changed today
-- [Commits from today]
+## What changed recently
+- [Commits from last 24h]
 
 ## Current state
 ✅ Implemented: [Completed tasks]
@@ -256,22 +137,79 @@ last_checkpoint_commit: {sha}
 [Count and brief summary of unresolved threads]
 ```
 
-### E7) Present EOD summary
+---
+
+## Phase 2 — Start Today
+
+### 7) Fetch fresh GitLab MR data (via MCP) — for each MR
+For each MR in `merge_requests`:
+- MR metadata (`gitlab_get_merge_request` with `mr_iid`)
+- MR discussions/threads (`gitlab_get_discussions` with `mr_iid`)
+- Pipeline status (`gitlab_get_pipeline` with `mr_iid`)
+
+**Error handling:** If MCP fails for any MR, note it and continue with others.
+
+### 8) Fetch fresh SonarQube data (via MCP)
+- Quality gate status (pass/fail + conditions)
+- Issues by severity (bugs, vulnerabilities, code smells)
+- Coverage metrics (overall % + new code %)
+
+### 9) Analyse and prioritise
+Cross-reference:
+- Unresolved MR threads → tasks
+- SonarQube issues → remediation work
+- Pipeline failures → fixes needed
+
+Priority matrix:
+- **High**: Quality gate blockers, security vulnerabilities, pipeline failures
+- **Medium**: Bugs, unresolved reviewer threads
+- **Low**: Code smells, minor improvements
+
+### 10) Present full daily report
 ```
-🌆 End of Day Summary
+🌅 Good morning — Project: {project_id}
 
-✅ MR Description: UPDATED / FAILED
-✅ Thread Replies: {count} drafts prepared
-✅ Handover: Updated
+━━━ Yesterday's wrap-up ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📝 Draft Replies (copy to GitLab):
-[Each draft with thread reference]
+✅ MR Descriptions updated: {count}
+✅ Thread reply drafts:     {count} (see below)
+✅ Handover:                written
 
-Next: Copy the draft replies to GitLab and resolve threads!
+━━━ Today's status ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 SonarQube:
+{quality_gate_emoji} Quality Gate: {status}
+Coverage: {coverage}% ({diff} vs base)
+Issues: {bugs} bugs, {vulns} vulnerabilities, {smells} code smells
+
+═══════════════════════════════════════════════════════
+
+📋 MR !{mr_iid}: {description}
+Branch: {feature_branch}
+Pipeline: ✅ PASSING / ❌ FAILED / 🔄 RUNNING
+💬 Threads: {count} unresolved
+Priority: HIGH / MEDIUM / LOW
+
+[Repeat for each MR]
+
+═══════════════════════════════════════════════════════
+
+🎯 Today's Priorities:
+1. [Highest priority]
+2. [Second priority]
+3. [Third priority]
+
+💡 Start with: MR !{mr_iid} ({reason})
+
+━━━ Thread reply drafts (copy to GitLab) ━━━━━━━━━━━━
+
+[Each draft with MR reference and thread context]
 ```
 
 ---
 
 ## Success Criteria
-**Morning:** User has clear picture of MR health, priorities are actionable, all quality signals surfaced.
-**EOD:** MR description reflects current state, thread replies are professional, handover enables easy pickup tomorrow.
+- MR descriptions are up to date before the day starts
+- Thread reply drafts are ready to post
+- Handover reflects current state
+- Developer has a clear, prioritised picture of what to work on

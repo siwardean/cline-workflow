@@ -187,7 +187,7 @@ Next steps:
 1. Run the morning.md workflow each morning to check MR status
 2. Ask your AI assistant to implement Task 1: "{first task title}"
 3. Run commit.md after each set of changes
-4. Run eod.md at end of day to update the MR description
+4. Run morning.md at the start of each day — it wraps up yesterday and kicks off today
 ```
 
 ## Success Criteria
