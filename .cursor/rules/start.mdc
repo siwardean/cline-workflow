@@ -1,6 +1,7 @@
 ---
 name: start
 description: Plan a user story, then auto-create the git branch and GitLab MR
+alwaysApply: false
 ---
 
 # Feature Start (User Story → Plan → Branch → MR)
@@ -31,7 +32,7 @@ description: Plan a user story, then auto-create the git branch and GitLab MR
 
 ## Input (you provide in chat)
 
-Just tell your AI assistant the following — no specific format required:
+Just provide the following — no specific format required:
 
 ```
 Story title: <short title>
@@ -41,8 +42,6 @@ Acceptance criteria:
   2. <AC 2>
   3. ...
 ```
-
-That's it. Your AI assistant handles everything else.
 
 ## Output
 - `memory-bank/story.md` — Full execution plan (tasks, tests, risks)
@@ -55,22 +54,14 @@ That's it. Your AI assistant handles everything else.
 ## Steps (tool-first)
 
 ### 1) Read workspace state
-```
-read_file: memory-bank/current-mr.md
-run_terminal_cmd: git status
-run_terminal_cmd: git branch --show-current
-```
+Read `memory-bank/current-mr.md`, run `git status` and `git branch --show-current`.
+Extract: `project_id`, `base_branch`. If missing, stop and ask the user to set them.
 
-Extract: `project_id`, `base_branch`. If missing, stop and ask the user to set them in `memory-bank/current-mr.md`.
-
-**Ensure memory-bank files are gitignored** — these are local AI workflow state and must not be committed to the developer's project, as parallel developers updating the same files will cause merge conflicts:
+**Ensure memory-bank files are gitignored** — these are local AI workflow state and must not be committed to the developer's project, as parallel developers updating the same files will cause merge conflicts.
+Run `cat .gitignore` and check if `memory-bank/handover.md`, `memory-bank/story.md`, and `memory-bank/retro.md` are already ignored. If not, append them:
 ```
-run_terminal_cmd: cat .gitignore
-```
-If `memory-bank/handover.md`, `memory-bank/story.md`, and `memory-bank/retro.md` are not already ignored, append them:
-```
-run_terminal_cmd: printf '\n# AI workflow state — local only, do not commit\nmemory-bank/handover.md\nmemory-bank/story.md\nmemory-bank/retro.md\n' >> .gitignore
-run_terminal_cmd: git rm --cached memory-bank/handover.md memory-bank/story.md memory-bank/retro.md 2>/dev/null || true
+printf '\n# AI workflow state — local only, do not commit\nmemory-bank/handover.md\nmemory-bank/story.md\nmemory-bank/retro.md\n' >> .gitignore
+git rm --cached memory-bank/handover.md memory-bank/story.md memory-bank/retro.md 2>/dev/null || true
 ```
 
 ### 2) Collect the user story
@@ -93,34 +84,18 @@ Examples:
 
 ### 3) Ground in the codebase
 
+Run `git fetch origin` and `git log --oneline origin/{base_branch} -10`.
+
+Extract 2–4 key terms from the title/description and search for relevant files:
 ```
-run_terminal_cmd: git fetch origin
-run_terminal_cmd: git log --oneline origin/{base_branch} -10
+git grep -l "{term}" -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.py' '*.java' '*.go'
 ```
 
-Extract 2–4 key terms from the title/description (e.g., "authentication", "export", "payment").
-
-For each term, search for relevant files:
-```
-run_terminal_cmd: git grep -l "{term}" -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.py' '*.java' '*.go'
-```
-
-Discover top-level structure:
-```
-list_dir: src   (or the appropriate source directory)
-```
-
-Read at most 2–3 of the most relevant files to understand architecture — do not read entire files unless necessary.
+Read at most 2–3 of the most relevant files to understand architecture.
 
 **If no files match:** that's fine, this may be a brand-new feature area.
 
 ### 4) Build the execution plan
-
-**Analyze requirements:**
-- Break down each Acceptance Criterion
-- Identify the technical approach
-- Estimate complexity (simple / medium / complex)
-- Note dependencies and edge cases
 
 **Create 5–12 tasks, each with:**
 
@@ -135,18 +110,6 @@ Task {N}: {Action verb} {What}
 - SonarQube risks: {complexity, duplication, security concerns}
 - Definition of Done: {specific, testable criteria}
 ```
-
-**AC coverage map:**
-```
-AC1 → Tasks [N, M]
-AC2 → Tasks [P]
-...
-```
-
-**Test strategy summary:**
-- Unit tests: {what to cover}
-- Integration tests: {if needed}
-- Coverage target: maintain or improve current %
 
 **Validate plan quality (internal check before presenting):**
 - ✅ Every AC is covered by at least one task
@@ -166,51 +129,25 @@ Display the full plan clearly in chat, then ask:
 Do you approve this plan?
 - ✅ Yes — I'll create the branch and MR now
 - ✏️  No — tell me what to change and I'll revise
-
-Your call before anything is created.
 ```
 
 **STOP HERE and wait for the developer's response.**
 
-- If the developer requests changes, revise the plan and present it again (repeat until approved).
+- If the developer requests changes, revise and present again (repeat until approved).
 - Only proceed to Step 6 after explicit approval.
 
 ### 6) Summarise the plan (concise MR description)
 
-Once approved, produce a **concise plan summary** (max ~20 lines) to use as the MR description:
-
-```markdown
-## Implementation Plan
-
-**Story:** {title}
-
-**Description:** {one-paragraph summary}
-
-### Acceptance Criteria
-1. {AC 1}
-2. {AC 2}
-...
-
-### Key Tasks
-1. {Task 1 — one line}
-2. {Task 2 — one line}
-...
-
-### Test Strategy
-- {Unit / integration / e2e summary}
-
-### Risks
-- {Main risks or "None identified"}
-```
+Once approved, produce a **concise plan summary** (max ~20 lines) to use as the MR description.
 
 ### 7) Create the feature branch
 
 ```
-run_terminal_cmd: git checkout {base_branch}
-run_terminal_cmd: git pull origin {base_branch}
-run_terminal_cmd: git checkout -b {feature_branch}
-run_terminal_cmd: git commit --allow-empty -m "feat: initialize {slug}"
-run_terminal_cmd: git push -u origin {feature_branch}
+git checkout {base_branch}
+git pull origin {base_branch}
+git checkout -b {feature_branch}
+git commit --allow-empty -m "feat: initialize {slug}"
+git push -u origin {feature_branch}
 ```
 
 **Error handling:** If the branch already exists, inform the user and ask whether to reuse it or pick a different name.
@@ -231,21 +168,12 @@ gitlab_create_merge_request (or equivalent tool):
 
 Capture the returned `mr_iid` from the MCP response.
 
-**Error handling:** If MCP creation fails, show the user the concise plan and the git commands — they can create the MR manually in GitLab.
+**Error handling:** If MCP creation fails, show the user the concise plan and git commands — they can create the MR manually in GitLab.
 
 ### 9) Update memory-bank files
 
-**Update `memory-bank/current-mr.md`** — append the new MR to the `merge_requests` list:
-
-```yaml
-merge_requests:
-  # ... existing entries ...
-  - mr_iid: {mr_iid}
-    feature_branch: {feature_branch}
-    description: "{story title}"
-```
-
-**Write `memory-bank/story.md`** with the full execution plan (all details from Step 4).
+Update `memory-bank/current-mr.md` — append the new MR to the `merge_requests` list.
+Write `memory-bank/story.md` with the full execution plan.
 
 ### 10) Confirm to the developer
 

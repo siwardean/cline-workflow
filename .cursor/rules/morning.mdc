@@ -1,6 +1,7 @@
 ---
 name: morning
 description: Daily ritual — wraps up yesterday then starts your day with a full status check
+alwaysApply: false
 ---
 
 # Daily Ritual (Wrap Up Yesterday → Start Today)
@@ -33,10 +34,7 @@ description: Daily ritual — wraps up yesterday then starts your day with a ful
 ## Steps
 
 ### 1) Read configuration
-```
-read_file: memory-bank/current-mr.md
-read_file: memory-bank/story.md (if exists)
-```
+Read `memory-bank/current-mr.md` and `memory-bank/story.md` (if exists).
 Extract: `project_id`, `merge_requests` (list with `mr_iid`, `feature_branch`, `description`), `base_branch`, `sonar_project_key`.
 
 **Error handling:** If file missing or required fields empty, stop and ask the user to configure it.
@@ -46,10 +44,7 @@ Extract: `project_id`, `merge_requests` (list with `mr_iid`, `feature_branch`, `
 ## Phase 1 — Wrap Up Yesterday
 
 ### 2) Check git status
-```
-run_terminal_cmd: git log --oneline -10
-run_terminal_cmd: git diff --stat origin/{base_branch}...HEAD
-```
+Run `git log --oneline -10` and `git diff --stat origin/{base_branch}...HEAD`.
 
 ### 3) Fetch SonarQube status (via MCP)
 **List MCP tools available**, then fetch:
@@ -61,10 +56,7 @@ run_terminal_cmd: git diff --stat origin/{base_branch}...HEAD
 **Error handling:** If SonarQube unavailable, note it in MR updates and proceed.
 
 ### 4) Update MR descriptions (via GitLab MCP) — all active MRs
-Read the MR template:
-```
-read_file: .gitlab/merge_request_templates/default.md
-```
+Read `.gitlab/merge_request_templates/default.md`.
 
 For each MR in `merge_requests`, fill in the template with:
 - Summary: from `story.md` or current MR description
@@ -73,12 +65,12 @@ For each MR in `merge_requests`, fill in the template with:
 - How to test: from `story.md` test plan
 - Proof: SonarQube quality gate, coverage, pipeline status, test results
 
-Update each MR description using GitLab MCP (`gitlab_update_merge_request` or equivalent).
+Update each MR using GitLab MCP (`gitlab_update_merge_request` or equivalent).
 
 **Error handling:** If MCP update fails for any MR, show the filled template for manual copy and continue with the next.
 
 ### 5) Draft replies to resolved threads (via GitLab MCP)
-For each MR, fetch discussions. For each thread that was opened by a reviewer, addressed in recent commits, and not yet resolved, draft:
+For each MR, fetch discussions. For each thread opened by a reviewer, addressed in recent commits, and not yet resolved, draft:
 ```
 Thanks for the feedback! I've addressed this.
 
@@ -93,13 +85,10 @@ Evidence:
 Can you verify and resolve the thread?
 ```
 
-Collect all drafts — they will be shown at the end.
+Collect all drafts — shown at the end.
 
 ### 6) Write handover
-```
-run_terminal_cmd: git log --oneline --since="24 hours ago"
-run_terminal_cmd: git rev-parse HEAD
-```
+Run `git log --oneline --since="24 hours ago"` and `git rev-parse HEAD`.
 
 Write `memory-bank/handover.md`:
 ```markdown
@@ -155,10 +144,7 @@ For each MR in `merge_requests`:
 - Coverage metrics (overall % + new code %)
 
 ### 9) Analyse and prioritise
-Cross-reference:
-- Unresolved MR threads → tasks
-- SonarQube issues → remediation work
-- Pipeline failures → fixes needed
+Cross-reference unresolved MR threads, SonarQube issues, and pipeline failures.
 
 Priority matrix:
 - **High**: Quality gate blockers, security vulnerabilities, pipeline failures

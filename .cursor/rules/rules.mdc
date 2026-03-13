@@ -1,3 +1,8 @@
+---
+description: Workspace rules for AI-assisted GitLab MR workflow
+alwaysApply: true
+---
+
 # Workspace Rules
 
 ## Tool-first behavior
@@ -16,14 +21,6 @@
 - Always check exit codes
 - Capture output for validation
 - Use `--` to separate flags from arguments in git commands
-
-> **Tool name reference** (varies by assistant):
-> | Action | Cline / Kilo Code | Cursor | OpenCode |
-> |--------|------------------|--------|----------|
-> | Read file | `read_file` | `read_file` | `read_file` |
-> | Write file | `write` | `edit_file` | `write_file` |
-> | Run command | `run_terminal_cmd` | `run_terminal_cmd` | `execute_command` |
-> | List dir | `list_dir` | `list_dir` | `list_dir` |
 
 ### MCP tools
 - **GitLab MCP**: Use explicit tool names (e.g., `gitlab_get_merge_request`, `gitlab_get_discussions`)

@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "gitlab": {
+      "command": "python-gitlab-mcp",
+      "args": [],
+      "env": {
+        "GITLAB_URL": "https://gitlab.company.tld",
+        "GITLAB_TOKEN": "your-personal-access-token-here",
+        "GITLAB_ALLOWED_PROJECT_IDS": "12345,67890"
+      }
+    },
+    "sonarqube": {
+      "command": "sonar-mcp",
+      "args": [],
+      "env": {
+        "SONAR_URL": "https://sonar.company.tld",
+        "SONAR_TOKEN": "your-sonar-token-here"
+      }
+    }
+  }
+}
