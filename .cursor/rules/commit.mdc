@@ -33,6 +33,7 @@ alwaysApply: false
 
 2) **If nothing staged:**
    Propose staging approach (`git add <files>` or `git add -p`).
+   **Never stage `memory-bank/*.md` files** — these are local workflow state and must not be committed (they are in `.gitignore`).
    Stop for user confirmation before staging.
 
 3) **Once staged:**
