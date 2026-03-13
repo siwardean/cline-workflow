@@ -17,6 +17,7 @@ alwaysApply: false
 - Proposes Angular Conventional Commit message (type, scope, subject)
 - Commits **only after you explicitly approve**
 - Pushes to remote branch
+- Updates the GitLab MR description with a lightweight progress snapshot (after push)
 
 ### ❌ DOES NOT:
 - Does NOT write code
@@ -69,7 +70,42 @@ alwaysApply: false
 8) **If approved:**
    Run `git commit -m "..."` then `git push`
 
+9) **Lightweight MR description update (after successful push):**
+
+   Read `memory-bank/current-mr.md` and run `git branch --show-current`.
+   Match current branch to an entry in the `merge_requests` list.
+   If no match, skip this step silently.
+
+   Optionally read `memory-bank/story.md` for task progress (N / M tasks completed).
+
+   Run `git log --oneline origin/{base_branch}...HEAD` to get recent commits.
+
+   Build and inject a progress block into the MR description:
+   ```markdown
+   <!-- PROGRESS:START — updated automatically by commit workflow, do not edit this block manually -->
+   ## 🔄 Progress (auto-updated)
+
+   **Last commit:** {message} (`{short sha}`)
+   **Updated:** {datetime}
+   **Branch:** {feature_branch} → {base_branch}
+
+   ### Recent commits
+   {list from git log, newest first, max 10}
+
+   ### Task progress (from story.md)
+   {N / M tasks completed — brief list, if story.md exists}
+   <!-- PROGRESS:END -->
+   ```
+
+   - Fetch current MR description via GitLab MCP
+   - Replace existing `<!-- PROGRESS:START/END -->` block, or append if absent
+   - Write back via `gitlab_update_merge_request` (or equivalent)
+
+   **If MCP is unavailable:** inform the user briefly and continue.
+   **The commit is already done — this step must never block or revert it.**
+
 ## Output
 - Proposed message(s)
 - Hooks run + result
-- Commands that will run if you approve
+- Committed and pushed changes
+- GitLab MR description updated with latest progress (or a note if MCP was unavailable)

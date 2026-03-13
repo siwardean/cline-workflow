@@ -17,6 +17,7 @@ description: Stage, test, and commit with conventional message
 - Proposes Angular Conventional Commit message (type, scope, subject)
 - Commits **only after you explicitly approve**
 - Pushes to remote branch
+- Updates the GitLab MR description with a lightweight progress snapshot (after push)
 
 ### ❌ DOES NOT:
 - Does NOT write code
@@ -127,7 +128,55 @@ Show user the errors and ask:
    - `run_terminal_cmd`: `git commit -m "..."` (and body/footer if needed)
    - `run_terminal_cmd`: `git push`
 
+9) Lightweight MR description update (after successful push):
+
+**Find the active MR for the current branch:**
+```
+read_file: memory-bank/current-mr.md
+run_terminal_cmd: git branch --show-current
+```
+Match current branch to an entry in the `merge_requests` list.
+If no match found, skip this step silently.
+
+**Read optional story context:**
+```
+read_file: memory-bank/story.md (if exists)
+```
+Extract task list and count completed vs total tasks (based on commits vs planned tasks).
+
+**Fetch recent commits:**
+```
+run_terminal_cmd: git log --oneline origin/{base_branch}...HEAD
+```
+
+**Build a progress block** to inject into the MR description:
+```markdown
+<!-- PROGRESS:START — updated automatically by commit workflow, do not edit this block manually -->
+## 🔄 Progress (auto-updated)
+
+**Last commit:** {commit message} (`{short sha}`)
+**Updated:** {datetime}
+**Branch:** {feature_branch} → {base_branch}
+
+### Recent commits
+{list of commits from git log, newest first, max 10}
+
+### Task progress (from story.md)
+{If story.md exists: "N / M tasks completed" with a brief list}
+{If story.md missing: omit this section}
+<!-- PROGRESS:END -->
+```
+
+**Update the MR description via GitLab MCP:**
+- Fetch the current MR description (`gitlab_get_merge_request` or similar)
+- If a `<!-- PROGRESS:START -->…<!-- PROGRESS:END -->` block already exists: replace it
+- If not: append the block at the end of the description
+- Write back using `gitlab_update_merge_request` (or similar)
+
+**Error handling:** If MCP is unavailable or the update fails, inform the user briefly and continue. **The commit itself is already done — this step must never block or revert it.**
+
 ## Output
 - Proposed message(s)
 - Hooks run + result
-- Commands that will run if you approve
+- Committed and pushed changes
+- GitLab MR description updated with latest progress (or a note if MCP was unavailable)
