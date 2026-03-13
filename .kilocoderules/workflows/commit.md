@@ -48,7 +48,6 @@ description: Stage, test, and commit with conventional message
 2) If nothing staged:
    - propose staging approach:
      - `git add <files>` OR `git add -p`
-   - **Never stage `memory-bank/*.md` files** — these are local workflow state and must not be committed (they are in `.gitignore`)
    - stop for user confirmation before staging
 
 3) Once staged:

@@ -56,6 +56,13 @@ Acceptance criteria:
 Read `memory-bank/current-mr.md`, run `git status` and `git branch --show-current`.
 Extract: `project_id`, `base_branch`. If missing, stop and ask the user to set them.
 
+**Ensure memory-bank files are gitignored** — these are local AI workflow state and must not be committed to the developer's project, as parallel developers updating the same files will cause merge conflicts.
+Run `cat .gitignore` and check if `memory-bank/handover.md`, `memory-bank/story.md`, and `memory-bank/retro.md` are already ignored. If not, append them:
+```
+printf '\n# AI workflow state — local only, do not commit\nmemory-bank/handover.md\nmemory-bank/story.md\nmemory-bank/retro.md\n' >> .gitignore
+git rm --cached memory-bank/handover.md memory-bank/story.md memory-bank/retro.md 2>/dev/null || true
+```
+
 ### 2) Collect the user story
 
 If the user has not already provided it, ask for:

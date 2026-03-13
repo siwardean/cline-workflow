@@ -63,6 +63,16 @@ run_terminal_cmd: git branch --show-current
 
 Extract: `project_id`, `base_branch`. If missing, stop and ask the user to set them in `memory-bank/current-mr.md`.
 
+**Ensure memory-bank files are gitignored** — these are local AI workflow state and must not be committed to the developer's project, as parallel developers updating the same files will cause merge conflicts:
+```
+run_terminal_cmd: cat .gitignore
+```
+If `memory-bank/handover.md`, `memory-bank/story.md`, and `memory-bank/retro.md` are not already ignored, append them:
+```
+run_terminal_cmd: printf '\n# AI workflow state — local only, do not commit\nmemory-bank/handover.md\nmemory-bank/story.md\nmemory-bank/retro.md\n' >> .gitignore
+run_terminal_cmd: git rm --cached memory-bank/handover.md memory-bank/story.md memory-bank/retro.md 2>/dev/null || true
+```
+
 ### 2) Collect the user story
 
 If the user has not already provided it, ask for:
