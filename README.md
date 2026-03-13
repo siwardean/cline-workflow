@@ -1,8 +1,76 @@
-# Cline GitLab Workflow Kit
+# Cline workflows for Agile developers
 
 **AI-assisted GitLab MR workflows** with automatic status checks, MR updates, and code quality tracking.
 
 Works with: GitLab + SonarQube + Cline (VS Code extension)
+
+---
+
+## 🗺️ How the Workflow Works
+
+The diagram below shows the **full feature lifecycle** — what you type, what Cline does, and when each workflow runs.
+
+```mermaid
+sequenceDiagram
+    actor Dev as 👤 Developer
+    participant Cline
+    participant Git as 🗂️ Git (local)
+    participant GL as 🦊 GitLab (MCP)
+    participant SQ as 📊 SonarQube (MCP)
+
+    rect rgb(230, 245, 255)
+        Note over Dev,GL: 🚀 start.md — Feature kick-off
+        Dev->>Cline: Story title + Description + Acceptance Criteria
+        Cline->>Git: Explore codebase (grep, log)
+        Cline->>Cline: Generate execution plan (5-12 tasks)
+        Cline->>Dev: Present plan for review
+        Dev->>Cline: ✅ Approve plan (or request changes)
+        Cline->>Git: git checkout -b feature/{slug} && git push
+        Cline->>GL: Create MR (Draft, concise plan in description)
+        GL-->>Cline: MR IID
+        Cline->>Cline: Update current-mr.md & story.md
+        Cline->>Dev: ✅ Branch & MR ready — here are your next steps
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Dev,SQ: ☀️ morning.md — Daily stand-up check
+        Dev->>Cline: Run morning.md
+        Cline->>GL: Fetch MR status, threads, pipeline
+        Cline->>SQ: Fetch quality gate, coverage, issues
+        Cline-->>Dev: Prioritised status report across all MRs
+    end
+
+    rect rgb(255, 252, 230)
+        Note over Dev,Git: 💻 Development loop (repeat per task)
+        Dev->>Cline: "Implement Task N: {title}"
+        Cline->>Git: Write code & tests, show diff
+        Dev->>Cline: Run commit.md
+        Cline->>Git: Stage → lint/test → propose commit message
+        Cline->>Dev: ❓ Approve commit?
+        Dev->>Cline: ✅ Approve
+        Cline->>Git: git commit && git push
+    end
+
+    rect rgb(255, 240, 240)
+        Note over Dev,SQ: 🌆 eod.md — End of day wrap-up
+        Dev->>Cline: Run eod.md
+        Cline->>SQ: Fetch latest metrics
+        Cline->>GL: Update MR description (from template + story plan)
+        Cline->>GL: Fetch open reviewer threads
+        Cline-->>Dev: Draft thread replies (copy-paste to GitLab) + handover.md
+    end
+
+    rect rgb(245, 235, 255)
+        Note over Dev,GL: ✅ close.md — Post-merge retrospective
+        Dev->>GL: Merge MR in GitLab UI (after approvals)
+        Dev->>Cline: Run close.md
+        Cline->>GL: Fetch merged MR metadata
+        Cline->>Cline: Compare delivery vs original plan
+        Cline-->>Dev: Retrospective saved to memory-bank/retro.md
+    end
+```
+
+**Key insight:** You only need to provide the user story — Cline creates the branch, opens the MR, and manages all GitLab updates throughout the feature lifecycle.
 
 ---
 
@@ -133,21 +201,23 @@ You should see status for **all your MRs**, including threads, pipeline status, 
 
 ## 📋 Available Workflows
 
-### **start.md** - Feature Planning
-**When**: Beginning of a new feature  
-**Input**: User story (you paste it in chat)  
+### **start.md** - Feature Planning + Branch + MR
+**When**: Beginning of a new feature
+**Input**: Story title, description, and acceptance criteria (just type them in chat)
 **What it does:**
-- ✅ Reads your Rally/Jira story
 - ✅ Searches codebase for relevant files
 - ✅ Creates execution plan with tasks mapped to acceptance criteria
-- ✅ Writes plan to `memory-bank/story.md`
+- ✅ **Presents the plan for your review — nothing is created until you approve**
+- ✅ Creates the git feature branch and pushes it
+- ✅ Creates the GitLab MR (Draft) with the concise approved plan as description
+- ✅ Writes full plan to `memory-bank/story.md`
+- ✅ Updates `memory-bank/current-mr.md` with MR details
 
 **What it does NOT do:**
-- ❌ Does NOT create git branch (you create it manually)
-- ❌ Does NOT create GitLab MR (you create it manually)
-- ❌ Does NOT write code
+- ❌ Does NOT create branch or MR without your plan approval
+- ❌ Does NOT write production code
 
-**Output**: `memory-bank/story.md` with detailed task plan
+**Output**: Git branch pushed, GitLab MR opened, `memory-bank/story.md` written
 
 ---
 
@@ -236,40 +306,42 @@ You should see status for **all your MRs**, including threads, pipeline status, 
 
 ## 🔄 Complete Feature Lifecycle (What YOU Do vs What CLINE Does)
 
-### **Phase 1: Setup** (You)
+### **Phase 1: Setup** (One-time per project)
 ```bash
-# 1. Create your feature branch
-git checkout -b feature/password-strength
-
-# 2. Make initial commit
-git commit --allow-empty -m "feat: initialize password strength feature"
-git push -u origin feature/password-strength
-
-# 3. Create MR in GitLab (via GitLab UI)
-#    - Go to GitLab → Merge Requests → New
-#    - Source: feature/password-strength
-#    - Target: main
-#    - Note the MR IID (e.g., !67)
-
-# 4. Add MR to config
-# Edit memory-bank/current-mr.md, add to merge_requests:
-#   - mr_iid: 67
-#     feature_branch: feature/password-strength
-#     description: "Password strength validator"
+# Only one file needed per project — set your project_id and base_branch:
+# Edit memory-bank/current-mr.md:
+#   project_id: 12345
+#   base_branch: main
 ```
 
-### **Phase 2: Planning** (Cline Helps)
+That's it. **Cline handles the rest when you run start.md.**
+
+### **Phase 2: Planning + Branch + MR** (Cline Does It All)
 ```
 You: Run the start.md workflow
 
-[Paste your user story]
+Tell Cline:
+  Story title: "Add password strength validator"
+  Description: "Users need feedback on password strength during registration"
+  Acceptance Criteria:
+    1. Shows weak/medium/strong indicator
+    2. Blocks form submit if weak
+    3. Works on all modern browsers
 
-Cline: 
-- ✅ Searches codebase
-- ✅ Creates execution plan
-- ✅ Writes memory-bank/story.md
+Cline:
+- ✅ Searches codebase for relevant code
+- ✅ Creates execution plan (5-12 tasks mapped to each AC)
+- ✅ Presents plan for YOUR REVIEW
 
-Output: Detailed plan with tasks, tests, files to modify
+You: Approve the plan (or ask for changes)
+
+Cline:
+- ✅ Creates branch: feature/add-password-strength-validator
+- ✅ Pushes branch to origin
+- ✅ Opens Draft MR on GitLab with concise plan in description
+- ✅ Updates memory-bank/current-mr.md and memory-bank/story.md
+
+Output: Branch + MR ready, full plan written — no GitLab UI needed
 ```
 
 ### **Phase 3: Development** (You + Cline)
@@ -342,18 +414,20 @@ Output: memory-bank/retro.md with lessons learned
 
 | Action | Who Does It |
 |--------|-------------|
-| Create branch | **YOU** (`git checkout -b`) |
-| Create MR | **YOU** (GitLab UI) |
+| Provide story + acceptance criteria | **YOU** |
 | Plan feature | **CLINE** (start.md) |
+| Review & approve the plan | **YOU** |
+| Create branch | **CLINE** (start.md, after your approval) |
+| Create MR with plan in description | **CLINE** (start.md, via GitLab MCP) |
 | Write code | **YOU + CLINE** (pair programming) |
 | Commit code | **CLINE** (commit.md, with your approval) |
-| Check status | **CLINE** (morning.md) |
-| Update MR | **CLINE** (eod.md, updates description) |
+| Check daily status | **CLINE** (morning.md) |
+| Update MR description | **CLINE** (eod.md) |
 | Post thread replies | **YOU** (copy drafts from Cline) |
-| Merge MR | **YOU** (GitLab UI) |
+| Merge MR | **YOU** (GitLab UI, after approvals) |
 | Write retro | **CLINE** (close.md) |
 
-**Bottom line:** Workflows automate the tedious stuff (status checks, MR updates, commit messages, retros). You stay in control of code, branches, and merging.
+**Bottom line:** You provide the story and review the plan — Cline handles branch creation, MR setup, status checks, MR updates, commit messages, and retrospectives.
 
 ---
 
