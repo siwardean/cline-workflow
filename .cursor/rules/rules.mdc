@@ -55,6 +55,18 @@ When workflows invoke SonarQube checks, agents MUST retrieve:
 
 Results MUST drive planning and remediation priority.
 
+## Branch naming
+- **Format**: `feature/<keyword>_<keyword>_<keyword>`
+- Extract 2–4 meaningful keywords from the story title and description
+- **Avoid generic words**: add, update, fix, feature, implement, new, change
+- Lowercase, underscores only, no special characters, no ticket numbers
+- Keep short: 2–4 keywords max
+
+Examples:
+- "Allow users to reset their password via email" → `feature/password_reset_email`
+- "Add pagination to the product listing page" → `feature/product_listing_pagination`
+- "Integrate Stripe for subscription billing" → `feature/stripe_subscription_billing`
+
 ## Commits
 - **Angular Conventional Commits required** - `<type>(<scope>): <subject>`
 - **Types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert

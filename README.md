@@ -2,7 +2,7 @@
 
 Stop managing branches, MRs, and status checks manually. These AI workflows handle the entire feature lifecycle — from user story to post-merge retrospective.
 
-Works with **Cline** · **Kilo Code** · **Cursor** · **OpenCode** — any MCP-compatible AI assistant.
+Works with **Claude Code** · **Cline** · **Kilo Code** · **Cursor** · **OpenCode** — any MCP-compatible AI assistant.
 
 ---
 
@@ -103,6 +103,16 @@ uv pip install python-gitlab-mcp sonar-mcp
 
 ### 2. Install workflows
 
+**Claude Code** (per project — workflows become `/start`, `/morning`, `/commit`, `/close` slash commands):
+```bash
+cp CLAUDE.md /path/to/your-project/
+cp -r .claude /path/to/your-project/
+```
+Global rules (applies to all projects):
+```bash
+cat CLAUDE.md >> ~/.claude/CLAUDE.md
+```
+
 **Cline** (global — works for all projects):
 ```bash
 mkdir -p ~/Documents/Cline/Rules ~/Documents/Cline/Workflows
@@ -155,6 +165,7 @@ Add to your AI assistant's MCP settings (see table below for file locations):
 
 | Tool | MCP config location |
 |---|---|
+| Claude Code | `~/.claude/settings.json` → `mcpServers` key |
 | Cline | VS Code → Cline → Settings → MCP Servers → Edit JSON |
 | Kilo Code | VS Code → Kilo Code → Settings → MCP Servers → Edit JSON |
 | Cursor | `.cursor/mcp.json` in project root |
@@ -181,6 +192,12 @@ merge_requests:
 
 ### 5. Try it
 
+**Claude Code:**
+```
+/morning
+```
+
+**All other tools:**
 ```
 Run the morning.md workflow
 ```
@@ -191,6 +208,7 @@ Run the morning.md workflow
 
 **AI can't find workflows** — verify install paths:
 ```bash
+ls .claude/commands/               # Claude Code
 ls ~/Documents/Cline/Workflows/    # Cline
 ls ~/Documents/KiloCode/Workflows/ # Kilo Code
 ```
