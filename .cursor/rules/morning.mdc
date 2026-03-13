@@ -44,6 +44,17 @@ Extract: project_id, merge_requests (list with mr_iid, feature_branch, descripti
 
 **Multi-MR handling:** Process each MR in the merge_requests list.
 
+### 1b) Read handover (optional context)
+Read `memory-bank/handover.md` if it exists. Check the `date` field:
+- **Dated yesterday**: extract "Current state", "Suggested next steps", "Open MR threads" — include as a **"Yesterday's context"** block in the final report.
+- **Missing or older than yesterday**: add a soft warning to the report:
+  ```
+  ⚠️  No handover from yesterday — eod.md was not run.
+      MR description on GitLab may be stale.
+      Consider running eod.md before starting new work.
+  ```
+  Then continue normally with live data.
+
 ### 2) Check Git status
 Run `git status` and `git log --oneline -5`.
 Show user their current branch and recent commits.
@@ -84,6 +95,17 @@ Create priority matrix:
 Format output as:
 ```
 🌅 Morning Status - Project: {project_id}
+
+[If handover.md found and dated yesterday]
+📓 Yesterday's context (from handover.md):
+  Last worked on: {current-state summary}
+  Suggested next: {suggested next steps}
+  Open threads:   {thread summary}
+
+[If handover.md missing or stale]
+⚠️  No handover from yesterday — eod.md was not run.
+    MR description on GitLab may be stale.
+    Consider running eod.md before starting new work.
 
 📊 SonarQube Overall Status:
 {quality_gate_emoji} Quality Gate: {status}
