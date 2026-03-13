@@ -7,149 +7,143 @@ description: Stage, test, and commit with conventional message
 
 ## What This Workflow Does
 
-**Helps you make clean, professional commits with proper messages.**
+Fully automated commit flow — runs start to finish without interruption.
+**The only question asked is at the very end: approve the commit message and push.**
 
 ### ✅ DOES:
-- Shows `git status` and `git diff` of your changes
-- Stages changes (with your confirmation)
-- Runs pre-commit hooks (lint-staged, pre-commit)
-- Auto-fixes linting errors when possible
-- Proposes Angular Conventional Commit message (type, scope, subject)
-- Commits **only after you explicitly approve**
-- Pushes to remote branch
-- Updates the GitLab MR description with a lightweight progress snapshot (after push)
+- Auto-stages all unstaged changes (`git add -A`)
+- Shows changed files list (`--stat` only, no full diff)
+- Runs pre-commit hooks automatically
+- Auto-fixes lint/format errors without asking
+- Generates a single best-fit Angular Conventional Commit message
+- Asks once for approval, then commits and pushes
+- Updates the GitLab MR description with a progress snapshot
 
 ### ❌ DOES NOT:
-- Does NOT write code
-- Does NOT create branches
-- Does NOT merge branches
-- Does NOT commit without your approval
-- Does NOT create MRs
-
-## Prerequisites
-- Git repository initialized
-- Changes made to files (either staged or unstaged)
-- Remote branch exists (or will create on first push)
-
-## Input
-- Your code changes (modified files)
-- Your approval to commit
-
-## Output
-- Committed changes with proper conventional commit message
-- Pushed to remote branch
+- Does NOT show full diffs
+- Does NOT ask for staging confirmation
+- Does NOT ask multiple approval questions
+- Does NOT write code, create branches, or merge
 
 ## Steps
-1) Facts:
-   - `run_terminal_cmd`: `git status`
-   - `run_terminal_cmd`: `git diff`
-   - `run_terminal_cmd`: `git diff --staged`
 
-2) If nothing staged:
-   - propose staging approach:
-     - `git add <files>` OR `git add -p`
-   - stop for user confirmation before staging
+### 1 — Gather facts (silently, in parallel)
 
-3) Once staged:
-   - `run_terminal_cmd`: `git diff --staged --stat`
-   - `run_terminal_cmd`: `git diff --staged`
-
-4) Run pre-commit hooks:
-
-**Read configuration:**
 ```
+git status --short
+git diff --stat          # unstaged
+git diff --staged --stat # already staged
+git log --oneline -5     # recent context for message style
 read_file: memory-bank/current-mr.md
 ```
-Check `precommit_runner` field.
 
-**Run appropriate hooks:**
+### 2 — Auto-stage everything
 
-If `precommit_runner: "lint-staged"`:
+If there are any unstaged changes (tracked or untracked relevant files):
 ```
-run_terminal_cmd: npx lint-staged
+git add -A
 ```
+Do **not** ask for confirmation. Do **not** pause.
 
-If `precommit_runner: "pre-commit"`:
+Then collect the staged file list:
 ```
-run_terminal_cmd: git diff --staged --name-only
-run_terminal_cmd: pre-commit run --files {staged files}
-```
-
-If `precommit_runner: "both"`:
-```
-run_terminal_cmd: npx lint-staged
-run_terminal_cmd: pre-commit run --files {staged files}
+git diff --staged --stat
+git diff --staged --name-only
 ```
 
-If `precommit_runner: null` or not set:
-Detect by checking for config files:
+If there is nothing to stage and nothing already staged → tell the user and stop.
+
+### 3 — Run pre-commit hooks (auto)
+
+Read `precommit_runner` from `memory-bank/current-mr.md`.
+
+| Value | Command |
+|---|---|
+| `lint-staged` | `npx lint-staged` |
+| `pre-commit` | `pre-commit run --files {staged files}` |
+| `both` | run lint-staged then pre-commit |
+| `null` / missing | check for `.pre-commit-config.yaml` or `package.json → lint-staged`; run if found, skip if not |
+
+If hooks are not installed: skip silently.
+
+### 4 — Auto-fix hook failures (no questions asked)
+
+If hooks fail, immediately attempt auto-fixes based on the error output:
+
+| Error type | Fix command |
+|---|---|
+| ESLint errors | `npx eslint --fix {files}` |
+| Prettier formatting | `npx prettier --write {files}` |
+| Black (Python) | `black {files}` |
+| isort | `isort {files}` |
+
+After auto-fixing, re-stage fixed files (`git add {fixed files}`) and re-run hooks once.
+
+**If hooks still fail after auto-fix** — and only then — show the errors and ask:
+> "Hooks still failing. Continue anyway, or stop so you can fix manually? [continue/stop]"
+
+### 5 — Generate commit message
+
+Analyse the staged diff (`git diff --staged`) and produce exactly **one** commit message:
+- Format: `<type>(<scope>): <subject>`
+- Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+- Subject: imperative mood, ≤50 chars, no trailing period
+- Add body (what + why) if the change is non-trivial
+- Add `BREAKING CHANGE:` footer if applicable
+
+Do not present alternatives. Pick the best one.
+
+### 6 — Single approval gate
+
+Show a compact summary — **this is the only prompt in the workflow**:
+
 ```
-list_dir: . (look for .pre-commit-config.yaml, package.json)
-```
-Propose appropriate command or skip hooks.
+─────────────────────────────────────────
+  Files staged:
+  {output of git diff --staged --stat}
 
-**Error handling:** If hooks not installed, inform user and skip (don't fail).
+  Commit message:
+  {proposed message}
 
-5) If hooks fail:
-
-**Parse failures:**
-- Extract file paths and error messages
-- Categorize: lint errors, format errors, test failures, type errors
-
-**Attempt auto-fix** (for fixable issues only):
-- ESLint: `run_terminal_cmd: npx eslint --fix {files}`
-- Prettier: `run_terminal_cmd: npx prettier --write {files}`
-- Black (Python): `run_terminal_cmd: black {files}`
-
-For non-fixable issues:
-- Show errors to user
-- Ask: "Should I fix these manually?" 
-- If yes: use `search_replace` for targeted fixes
-
-**Re-run hooks:**
-```
-run_terminal_cmd: {same hook command}
+  Push to: {remote}/{branch}
+─────────────────────────────────────────
+  Approve and push? [Y/n] (or type a new message):
 ```
 
-**If still failing:**
-Show user the errors and ask:
-- "Continue anyway?" (for minor issues)
-- "Let me fix manually first" (user takes over)
-- "Skip commit for now"
+Behaviour:
+- **Y / Enter** → commit and push immediately
+- **n** → stop, do nothing
+- **Custom text typed** → use that text as the commit message, then commit and push
 
-6) Propose commit message:
-   - 1 primary + up to 2 alternatives
-   - follow `<type>(<scope>): <subject>`
-   - include BREAKING CHANGE footer if needed
+### 7 — Commit and push
 
-7) Ask for explicit approval.
+```
+git commit -m "{message}"
+git push -u origin {branch}
+```
 
-8) If approved:
-   - `run_terminal_cmd`: `git commit -m "..."` (and body/footer if needed)
-   - `run_terminal_cmd`: `git push`
+If push fails due to no upstream: `git push --set-upstream origin {branch}`.
 
-9) Lightweight MR description update (after successful push):
+### 8 — Update MR description (after push, no user input needed)
 
-**Find the active MR for the current branch:**
+Find the active MR for the current branch:
 ```
 read_file: memory-bank/current-mr.md
-run_terminal_cmd: git branch --show-current
+git branch --show-current
 ```
-Match current branch to an entry in the `merge_requests` list.
-If no match found, skip this step silently.
+Match current branch → `merge_requests` list. If no match, skip silently.
 
-**Read optional story context:**
+Read story context if available:
 ```
 read_file: memory-bank/story.md (if exists)
 ```
-Extract task list and count completed vs total tasks (based on commits vs planned tasks).
 
-**Fetch recent commits:**
+Fetch commits:
 ```
-run_terminal_cmd: git log --oneline origin/{base_branch}...HEAD
+git log --oneline origin/{base_branch}...HEAD
 ```
 
-**Build a progress block** to inject into the MR description:
+Build and inject progress block into the MR description:
 ```markdown
 <!-- PROGRESS:START — updated automatically by commit workflow, do not edit this block manually -->
 ## 🔄 Progress (auto-updated)
@@ -159,24 +153,20 @@ run_terminal_cmd: git log --oneline origin/{base_branch}...HEAD
 **Branch:** {feature_branch} → {base_branch}
 
 ### Recent commits
-{list of commits from git log, newest first, max 10}
+{git log output, newest first, max 10}
 
 ### Task progress (from story.md)
-{If story.md exists: "N / M tasks completed" with a brief list}
-{If story.md missing: omit this section}
+{N / M tasks completed — brief list, only if story.md exists}
 <!-- PROGRESS:END -->
 ```
 
-**Update the MR description via GitLab MCP:**
-- Fetch the current MR description (`gitlab_get_merge_request` or similar)
-- If a `<!-- PROGRESS:START -->…<!-- PROGRESS:END -->` block already exists: replace it
-- If not: append the block at the end of the description
-- Write back using `gitlab_update_merge_request` (or similar)
-
-**Error handling:** If MCP is unavailable or the update fails, inform the user briefly and continue. **The commit itself is already done — this step must never block or revert it.**
+- Replace existing `PROGRESS:START…PROGRESS:END` block if present, otherwise append
+- Use `gitlab_update_merge_request` to write back
+- If MCP unavailable: note it briefly, do not block or revert the commit
 
 ## Output
-- Proposed message(s)
-- Hooks run + result
-- Committed and pushed changes
-- GitLab MR description updated with latest progress (or a note if MCP was unavailable)
+
+- Changed files list shown once
+- One commit message shown once
+- One approval prompt
+- Committed, pushed, MR description updated
