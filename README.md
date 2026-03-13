@@ -94,70 +94,54 @@ sequenceDiagram
 
 ## Setup
 
-### 1. Install MCP servers
-
 ```bash
-pip install uv
+git clone https://github.com/siwardean/cline-workflow.git
+cd cline-workflow
+python install.py
+```
+
+The installer walks you through everything interactively:
+
+| Step | What it does |
+|---|---|
+| 1 | Installs `python-gitlab-mcp` and `sonar-mcp` via uv or pip |
+| 2 | Copies workflow files to the right location for your tool(s) |
+| 3 | Writes MCP credentials into your tool's config file |
+| 4 | Creates `memory-bank/current-mr.md` in your project |
+| 5 | Runs `validate_mcp_setup.py` to confirm everything works |
+
+Get tokens before running: GitLab → Settings → Access Tokens (scope: `api`) · SonarQube → My Account → Security.
+
+<details>
+<summary>Manual setup (if you prefer)</summary>
+
+**Install packages:**
+```bash
 uv pip install python-gitlab-mcp sonar-mcp
 ```
 
-### 2. Install workflows
+**Copy workflows for your tool:**
 
-**Claude Code** (per project — workflows become `/start`, `/morning`, `/commit`, `/close` slash commands):
-```bash
-cp CLAUDE.md /path/to/your-project/
-cp -r .claude /path/to/your-project/
-```
-Global rules (applies to all projects):
-```bash
-cat CLAUDE.md >> ~/.claude/CLAUDE.md
-```
+| Tool | Command |
+|---|---|
+| Claude Code | `cp CLAUDE.md /your-project/ && cp -r .claude /your-project/` |
+| Cline | `cp .clinerules/rules.md ~/Documents/Cline/Rules/ && cp .clinerules/workflows/* ~/Documents/Cline/Workflows/` |
+| Kilo Code | `cp .kilocoderules/rules.md ~/Documents/KiloCode/Rules/ && cp .kilocoderules/workflows/* ~/Documents/KiloCode/Workflows/` |
+| Cursor | `cp -r .cursor /your-project/` |
+| OpenCode | `cp -r .clinerules /your-project/` |
 
-**Cline** (global — works for all projects):
-```bash
-mkdir -p ~/Documents/Cline/Rules ~/Documents/Cline/Workflows
-cp .clinerules/rules.md ~/Documents/Cline/Rules/
-cp .clinerules/workflows/* ~/Documents/Cline/Workflows/
-```
-
-**Kilo Code** (global):
-```bash
-mkdir -p ~/Documents/KiloCode/Rules ~/Documents/KiloCode/Workflows
-cp .kilocoderules/rules.md ~/Documents/KiloCode/Rules/
-cp .kilocoderules/workflows/* ~/Documents/KiloCode/Workflows/
-```
-
-**Cursor** (per project):
-```bash
-cp -r /path/to/cline-workflow/.cursor ./
-```
-
-**OpenCode** (per project):
-```bash
-cp -r /path/to/cline-workflow/.clinerules ./
-```
-
-### 3. Configure MCP servers
-
-Add to your AI assistant's MCP settings (see table below for file locations):
+**Add MCP config** to your tool's settings file:
 
 ```json
 {
   "mcpServers": {
     "gitlab": {
       "command": "python-gitlab-mcp",
-      "env": {
-        "GITLAB_URL": "https://gitlab.company.tld",
-        "GITLAB_TOKEN": "your-token",
-        "GITLAB_ALLOWED_PROJECT_IDS": "12345"
-      }
+      "env": { "GITLAB_URL": "...", "GITLAB_TOKEN": "...", "GITLAB_ALLOWED_PROJECT_IDS": "..." }
     },
     "sonarqube": {
       "command": "sonar-mcp",
-      "env": {
-        "SONAR_URL": "https://sonar.company.tld",
-        "SONAR_TOKEN": "your-token"
-      }
+      "env": { "SONAR_URL": "...", "SONAR_TOKEN": "..." }
     }
   }
 }
@@ -165,32 +149,15 @@ Add to your AI assistant's MCP settings (see table below for file locations):
 
 | Tool | MCP config location |
 |---|---|
-| Claude Code | `~/.claude/settings.json` → `mcpServers` key |
+| Claude Code | `~/.claude/settings.json` |
 | Cline | VS Code → Cline → Settings → MCP Servers → Edit JSON |
 | Kilo Code | VS Code → Kilo Code → Settings → MCP Servers → Edit JSON |
 | Cursor | `.cursor/mcp.json` in project root |
 | OpenCode | `~/.config/opencode/config.json` |
 
-Get tokens: GitLab → Settings → Access Tokens (scope: `api`) · SonarQube → My Account → Security.
+</details>
 
-### 4. Configure your project
-
-Create `memory-bank/current-mr.md` in your project root:
-
-```yaml
-base_branch: main
-project_id: 12345
-sonar_project_key: my-project
-mr_template_path: .gitlab/merge_request_templates/default.md
-precommit_runner: null   # lint-staged | pre-commit | both | null
-
-merge_requests:
-  - mr_iid: 67
-    feature_branch: feature/user_auth_jwt
-    description: "User authentication with JWT"
-```
-
-### 5. Try it
+### Try it
 
 **Claude Code:**
 ```
