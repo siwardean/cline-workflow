@@ -1,6 +1,6 @@
 # Workflow Reference
 
-Four workflows cover the entire feature lifecycle. Run them by telling your AI assistant:
+Five workflows cover the entire feature lifecycle. Run them by telling your AI assistant:
 > _"Run the [name].md workflow"_
 
 ---
@@ -12,6 +12,7 @@ Four workflows cover the entire feature lifecycle. Run them by telling your AI a
 | **start.md** | Once, before development begins | Yes — creates MR | No |
 | **morning.md** | Every morning | Yes — updates MR descriptions | No |
 | **commit.md** | After each set of code changes | Yes — updates MR progress | No (only commits) |
+| **review.md** | When asked to review an MR | Yes — posts discussion threads | No |
 | **close.md** | Once, after MR is merged | Read-only | No |
 
 ---
@@ -167,6 +168,59 @@ After every push, the AI injects a `<!-- PROGRESS:START -->` block into the MR d
 - Task progress from `story.md` (N / M tasks done)
 
 If GitLab MCP is unavailable, the commit still goes through — the MR update is best-effort.
+
+---
+
+## review.md — MR Code Review
+
+**Trigger:** You're asked to review someone else's MR (or your own before asking for approval).
+
+```mermaid
+flowchart TD
+    A[Detect branch / prompt for MR IID] --> B[Fetch MR metadata + discussions via GitLab MCP]
+    B --> C[git diff: fetch full diff]
+    C --> D[Assess existing open threads]
+    D --> E{Code changed after thread?}
+    E -->|Yes| F[Mark: Addressed by code]
+    E -->|No| G{Author replied?}
+    G -->|Yes| H[Mark: Addressed by reply]
+    G -->|No| I[Mark: Needs attention]
+    F & H & I --> J[Perform code review on diff]
+    J --> K[Present findings table]
+    K --> L{Which to post?}
+    L -->|Selected| M[Post as GitLab discussion threads]
+    L -->|None| N[Skip posting]
+    M & N --> O[Print summary]
+```
+
+### Review categories
+
+| Category | Examples |
+|---|---|
+| 🔴 Bug | Null dereference, off-by-one, swallowed exception |
+| 🔴 Security | SQL injection, hardcoded secret, missing auth check |
+| 🟠 Performance | N+1 query, unbounded loop, missing index |
+| 🟡 Style | Generic name, duplicated logic, dead code |
+| 🔵 Tests | Missing coverage for new path, implementation-coupled assertions |
+| 🔵 Docs | Undocumented public API change |
+
+### Thread assessment
+
+For each existing open thread, classifies as:
+- `✅ Addressed by code` — the relevant file/area was changed after the thread was opened
+- `💬 Addressed by reply` — the MR author replied to the reviewer
+- `⚠️ Needs attention` — no code change or reply since the thread was opened
+
+### Single approval gate
+
+After showing all findings, asks once which to post. Everything else runs automatically.
+
+### What it does NOT do
+
+- Does not approve or merge the MR
+- Does not resolve threads
+- Does not write or fix code
+- Does not post anything without your selection
 
 ---
 

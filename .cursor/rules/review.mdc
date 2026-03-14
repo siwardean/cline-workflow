@@ -1,0 +1,239 @@
+---
+name: review
+description: Review the current MR and post agreed comments as GitLab threads
+alwaysApply: false
+---
+
+# MR Review Workflow
+
+## What This Workflow Does
+
+**Performs a thorough code review of an MR, then lets you selectively post findings as GitLab discussion threads. Also assesses any existing open threads to see if they've been addressed.**
+
+### ✅ DOES:
+- Auto-detects the MR from the current branch (or prompts for one)
+- Fetches the full MR diff and metadata via GitLab MCP
+- Reviews code for bugs, security, performance, style, and test coverage
+- Presents findings and asks which ones to post
+- Creates GitLab discussion threads for approved findings
+- Assesses existing open threads: resolved by code change or by author reply
+
+### ❌ DOES NOT:
+- Does NOT approve or merge the MR
+- Does NOT resolve threads
+- Does NOT write or fix code
+- Does NOT post anything without your explicit approval
+
+## Prerequisites
+- `memory-bank/current-mr.md` configured with `project_id`, `merge_requests`, `base_branch`
+- GitLab MCP server available
+
+---
+
+## Steps
+
+### 1 — Identify the MR to review
+
+```
+run_terminal_cmd: git branch --show-current
+read_file: memory-bank/current-mr.md
+```
+
+**If current branch matches an entry in `merge_requests`:** use that `mr_iid` automatically.
+
+**If on `main` / `master` / no match found:** ask the user:
+> "Which MR do you want to review? Enter an MR IID or branch name:"
+
+If a branch name is given, match it against `merge_requests` list to resolve the `mr_iid`.
+
+---
+
+### 2 — Fetch MR data (parallel via GitLab MCP)
+
+```
+gitlab_get_merge_request(project_id, mr_iid)
+gitlab_get_discussions(project_id, mr_iid)
+```
+
+From the MR metadata extract:
+- Title, description, author, source branch → target branch
+- Pipeline status
+- Number of changed files, additions, deletions
+
+From discussions extract and separate:
+- **Open threads** (unresolved): note author, body, file, line if applicable
+- **Resolved threads**: ignore
+
+**Error handling:** If MCP unavailable, stop and tell the user to check MCP setup with `python validate_mcp_setup.py`.
+
+---
+
+### 3 — Fetch the diff
+
+```
+run_terminal_cmd: git fetch origin
+run_terminal_cmd: git diff origin/{base_branch}...origin/{source_branch} --stat
+run_terminal_cmd: git diff origin/{base_branch}...origin/{source_branch}
+```
+
+If the diff is very large (>1000 lines), fetch it file-by-file:
+```
+run_terminal_cmd: git diff origin/{base_branch}...origin/{source_branch} -- {file}
+```
+
+---
+
+### 4 — Assess existing open threads
+
+For each open thread, determine whether it has been addressed since it was created. Check in this order:
+
+**A — Addressed by code change:**
+```
+run_terminal_cmd: git log --oneline origin/{base_branch}...origin/{source_branch}
+run_terminal_cmd: git diff {thread_created_after_sha}...origin/{source_branch} -- {thread_file}
+```
+If the relevant code was changed after the thread was opened → likely addressed.
+
+**B — Addressed by author reply:**
+Look at the thread's notes: if the MR author posted a reply after the reviewer's comment → they responded.
+
+**Classify each open thread as:**
+- `✅ Addressed by code` — file/area changed after thread was opened
+- `💬 Addressed by reply` — MR author replied to the thread
+- `⚠️ Needs attention` — no code change or reply since the thread was opened
+
+Present the assessment table before doing the new review:
+
+```
+## Existing Threads Assessment
+
+| # | File | Comment summary | Status |
+|---|------|-----------------|--------|
+| 1 | src/foo.py:42 | Missing null check | ✅ Addressed by code |
+| 2 | src/bar.py:10 | N+1 query risk | ⚠️ Needs attention |
+| 3 | README.md | Typo in title | 💬 Addressed by reply |
+```
+
+---
+
+### 5 — Perform the code review
+
+Review the diff thoroughly across these categories. For each finding, record:
+- **Category**: Bug / Security / Performance / Style / Test coverage / Documentation
+- **Severity**: 🔴 Critical · 🟠 Major · 🟡 Minor · 🔵 Info
+- **File + line** (be specific)
+- **What the problem is** (plain language)
+- **Suggested fix or improvement**
+
+Review checklist (apply all that are relevant):
+
+**Correctness & Bugs**
+- Off-by-one errors, null/undefined dereferences
+- Incorrect conditionals or inverted logic
+- Race conditions or missing locks
+- Error paths that silently swallow exceptions
+
+**Security**
+- Unvalidated user input reaching SQL / shell / HTML
+- Secrets or tokens hardcoded
+- Overly permissive access controls
+- Insecure deserialization or dependency versions
+
+**Performance**
+- N+1 queries or missing eager loading
+- Unbounded loops over large datasets
+- Missing indexes implied by new query patterns
+- Unnecessary re-computation inside loops
+
+**Code Quality**
+- Functions doing more than one thing
+- Duplicated logic that should be extracted
+- Misleading names or stale comments
+- Dead code left behind
+
+**Tests**
+- New logic paths not covered by tests
+- Tests asserting on implementation details instead of behaviour
+- Missing edge cases: empty input, max values, error states
+
+**Documentation**
+- Public API changes without updated docs or changelog
+- Complex logic without an explanatory comment
+
+---
+
+### 6 — Present findings and ask for approval
+
+Show a numbered list of all findings:
+
+```
+## Review Findings
+
+| # | Sev | File | Finding |
+|---|-----|------|---------|
+| 1 | 🔴 | src/auth.py:87 | SQL query built from raw user input — SQL injection risk |
+| 2 | 🟠 | src/user.py:34 | Missing null check before `.get()` — will crash on missing key |
+| 3 | 🟡 | src/utils.py:12 | Function name `process` is too generic |
+| 4 | 🔵 | tests/test_auth.py | No test for the unauthenticated path |
+```
+
+Then ask once:
+> "Which findings should I post as GitLab threads? Enter numbers (e.g. 1 3 4), 'a' for all, or 'n' to skip posting:"
+
+---
+
+### 7 — Post approved findings as GitLab threads
+
+For each approved finding, create a discussion thread via GitLab MCP:
+
+```
+gitlab_create_discussion(
+  project_id,
+  mr_iid,
+  body: "{formatted comment — see template below}",
+  position: { file, line }   # if finding has a specific line
+)
+```
+
+**Comment template:**
+```markdown
+**[{Category}] {Severity emoji} {short title}**
+
+{Plain-language description of the problem}
+
+**Suggested fix:**
+{concrete suggestion or code snippet if helpful}
+```
+
+Post threads one at a time. After each, confirm success before continuing.
+
+If a finding has no specific line (e.g. general test coverage), post as a general MR-level thread (no position).
+
+**Error handling:** If a thread fails to post (line out of range, MCP error), note it and continue with the rest. Report failures at the end.
+
+---
+
+### 8 — Summary
+
+Print a final summary:
+
+```
+## Review Complete
+
+**MR:** !{mr_iid} — {title}
+
+**Existing threads:**
+- {N} open threads assessed
+- {X} addressed by code, {Y} addressed by reply, {Z} need attention
+
+**New threads posted:** {count}
+**Findings skipped:** {count}
+
+### Threads needing attention:
+{list of ⚠️ threads from step 4 with their original comments}
+
+### Next steps:
+- Fix any ⚠️ threads that haven't been addressed yet
+- Respond to new threads if you disagree with any finding
+- Run /morning tomorrow for a full MR status update
+```
