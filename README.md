@@ -10,41 +10,51 @@ Works with **Claude Code** · **Cline** · **Kilo Code** · **Cursor** · **Open
 
 ```mermaid
 flowchart TD
-    A([👤 You have a story]) --> B
+    A([👤 New story]) --> B
 
-    subgraph S["🚀 start.md — once per feature"]
-        B[Provide title + description + ACs] --> C[AI explores codebase]
-        C --> D[AI generates execution plan]
-        D --> E{You review plan}
-        E -->|Changes needed| D
-        E -->|✅ Approved| F[AI creates branch + GitLab MR]
+    subgraph S["🚀 start.md"]
+        B[Title + ACs] --> C[Explore codebase]
+        C --> D[Generate plan]
+        D --> E{Review plan}
+        E -->|Revise| D
+        E -->|✅ Approve| F[Create branch + MR]
     end
 
     F --> G
+    REVIEWER([👤 Reviewer]) --> RA
 
-    subgraph LOOP["🔁 Development loop — repeat per task"]
-        G[You + AI implement a task] --> H
+    subgraph LOOP["🔁 Dev loop"]
+        G[Implement task] --> H
         subgraph COMMIT["📝 commit.md"]
-            H[AI shows diff + runs lint/tests] --> I{You approve commit?}
-            I -->|✅ Yes| J[AI commits + pushes]
+            H[Auto-stage + lint] --> I[Propose message]
+            I --> J{Approve + push?}
+            J -->|✅ Yes| K[Commit + push]
         end
     end
 
-    J --> K
-
-    subgraph MORNING["☀️ morning.md — every morning"]
-        K[AI updates all MR descriptions] --> L[AI drafts thread replies]
-        L --> M[AI writes handover]
-        M --> N[AI checks GitLab + SonarQube]
-        N --> O[📋 Prioritised task list for the day]
+    subgraph REVIEW["🔍 review.md"]
+        RA[Fetch diff + threads] --> RB[Assess threads]
+        RB --> RC[Review code]
+        RC --> RD[Show findings]
+        RD --> RE{Pick which to post}
+        RE -->|Selected| RF[Post threads]
     end
 
-    O -->|More work to do| G
-    O -->|MR ready to merge| P
+    K --> L
 
-    subgraph CLOSE["✅ close.md — after merge"]
-        P[You merge in GitLab] --> Q[AI compares delivery vs plan]
-        Q --> R[📄 Retrospective written]
+    subgraph MORNING["☀️ morning.md"]
+        L[Update MR descriptions] --> M[Draft thread replies]
+        M --> N[Write handover]
+        N --> O[Check GitLab + Sonar]
+        O --> P[📋 Task list]
+    end
+
+    P -->|More work| G
+    P -->|Ready to merge| Q
+
+    subgraph CLOSE["✅ close.md"]
+        Q[Merge in GitLab] --> R[Delivery vs plan]
+        R --> T[📄 Retrospective]
     end
 ```
 
@@ -56,7 +66,8 @@ flowchart TD
 |---|---|---|---|
 | **start.md** | New feature | Story title, description, ACs | Plan → branch → MR |
 | **morning.md** | Every morning | Nothing | Wrap up yesterday + status check |
-| **commit.md** | After code changes | Staged files | Lint → commit msg → push |
+| **commit.md** | After code changes | Approve message + push | Auto-stage → lint → single approval → push |
+| **review.md** | When asked to review an MR | Which findings to post | Diff review → thread assessment → post threads |
 | **close.md** | After MR merged | Nothing | Retrospective |
 
 ### Daily Developer Flow
@@ -64,30 +75,42 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     actor Dev as 👤 You
+    actor Rev as 👤 Reviewer
     participant AI as 🤖 AI
     participant GL as 🦊 GitLab
     participant SQ as 📊 SonarQube
 
-    Note over Dev,SQ: ☀️ morning.md — start of day
+    Note over Dev,SQ: ☀️ morning.md
 
     AI->>GL: Update MR descriptions
-    AI->>GL: Fetch reviewer threads → draft replies
+    AI->>GL: Fetch threads + draft replies
     AI->>AI: Write handover.md
-    AI->>GL: Fetch MR status + pipeline
-    AI->>SQ: Fetch quality gate + coverage
-    AI-->>Dev: Prioritised task list
+    AI->>GL: Fetch MR status
+    AI->>SQ: Fetch quality gate
+    AI-->>Dev: Task list for the day
 
-    Note over Dev,SQ: 💻 Development loop
+    Note over Dev,SQ: 💻 commit.md
 
     loop Each task
-        Dev->>AI: Implement task N
+        Dev->>AI: Implement task
         AI-->>Dev: Code + tests
         Dev->>AI: commit.md
-        AI->>AI: Lint + run hooks
-        AI-->>Dev: Proposed commit message
+        AI->>AI: Stage + lint + hooks
+        AI-->>Dev: Files + message
         Dev->>AI: ✅ Approve
-        AI->>GL: git commit + push
+        AI->>GL: Commit + push
     end
+
+    Note over Rev,GL: 🔍 review.md
+
+    Rev->>AI: review.md
+    AI->>GL: Fetch diff + threads
+    AI->>AI: Assess open threads
+    AI->>AI: Review code
+    AI-->>Rev: Findings + assessment
+    Rev->>AI: Pick findings to post
+    AI->>GL: Post threads
+    AI-->>Rev: Summary
 ```
 
 ---
@@ -162,11 +185,15 @@ uv pip install python-gitlab-mcp sonar-mcp
 **Claude Code:**
 ```
 /morning
+/commit
+/review
 ```
 
 **All other tools:**
 ```
 Run the morning.md workflow
+Run the commit.md workflow
+Run the review.md workflow
 ```
 
 ---
