@@ -192,3 +192,69 @@ def test_all_rules_files_define_branch_format():
             f"{rules_file.relative_to(REPO_ROOT)}: missing branch naming format example"
         assert "## Branch naming" in content, \
             f"{rules_file.relative_to(REPO_ROOT)}: missing '## Branch naming' section"
+
+
+# ---------------------------------------------------------------------------
+# Review workflow content contracts
+# ---------------------------------------------------------------------------
+
+def test_review_prompts_for_mr_on_main():
+    """review.md must handle the case where the user is on main/master."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    assert "main" in content and "master" in content, \
+        "review.md must handle being run from main/master branch"
+    # Must ask for MR IID or branch name in that case
+    assert "mr_iid" in content.lower() or "MR IID" in content, \
+        "review.md must prompt for MR IID when branch is not matched"
+
+
+def test_review_thread_assessment_categories():
+    """review.md must classify existing threads into the three expected states."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    assert "Addressed by code" in content, \
+        "review.md missing thread classification: 'Addressed by code'"
+    assert "Addressed by reply" in content, \
+        "review.md missing thread classification: 'Addressed by reply'"
+    assert "Needs attention" in content, \
+        "review.md missing thread classification: 'Needs attention'"
+
+
+def test_review_single_approval_gate():
+    """review.md must have exactly one prompt for the user, not one per finding."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    # Must ask which findings to post in a single step
+    assert "which" in content.lower() and ("post" in content.lower() or "thread" in content.lower()), \
+        "review.md must have a single 'which findings to post' prompt"
+    # Must NOT require per-finding confirmation
+    assert "approve each" not in content.lower(), \
+        "review.md must not ask for per-finding approval"
+
+
+def test_review_severity_levels():
+    """review.md must define severity levels for findings."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    for level in ["Critical", "Major", "Minor"]:
+        assert level in content, \
+            f"review.md missing severity level '{level}'"
+
+
+def test_review_does_not_auto_post():
+    """review.md must not post threads without user selection."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    does_not = content.split("❌ DOES NOT")[1].split("##")[0] if "❌ DOES NOT" in content else ""
+    assert "without" in does_not.lower() or "approval" in does_not.lower() or "explicit" in does_not.lower(), \
+        "review.md DOES NOT section must state it won't post without user selection"
+
+
+def test_review_covers_all_categories():
+    """review.md must cover the core review categories."""
+    path = workflow_path("cline", "review")
+    content = path.read_text()
+    for category in ["Security", "Performance", "Bug", "Test"]:
+        assert category in content, \
+            f"review.md missing review category '{category}'"
