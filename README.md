@@ -10,51 +10,51 @@ Works with **Claude Code** · **Cline** · **Kilo Code** · **Cursor** · **Open
 
 ```mermaid
 flowchart TD
-    A([👤 You have a story]) --> B
+    A([👤 New story]) --> B
 
-    subgraph S["🚀 start.md — once per feature"]
-        B[Provide title + description + ACs] --> C[AI explores codebase]
-        C --> D[AI generates execution plan]
-        D --> E{You review plan}
-        E -->|Changes needed| D
-        E -->|✅ Approved| F[AI creates branch + GitLab MR]
+    subgraph S["🚀 start.md"]
+        B[Title + ACs] --> C[Explore codebase]
+        C --> D[Generate plan]
+        D --> E{Review plan}
+        E -->|Revise| D
+        E -->|✅ Approve| F[Create branch + MR]
     end
 
     F --> G
+    REVIEWER([👤 Reviewer]) --> RA
 
-    subgraph LOOP["🔁 Development loop — repeat per task"]
-        G[You + AI implement a task] --> H
+    subgraph LOOP["🔁 Dev loop"]
+        G[Implement task] --> H
         subgraph COMMIT["📝 commit.md"]
-            H[AI auto-stages + runs lint/tests] --> I[AI proposes commit message]
-            I --> J{You approve + push?}
-            J -->|✅ Yes| K[AI commits + pushes]
+            H[Auto-stage + lint] --> I[Propose message]
+            I --> J{Approve + push?}
+            J -->|✅ Yes| K[Commit + push]
         end
     end
 
+    subgraph REVIEW["🔍 review.md"]
+        RA[Fetch diff + threads] --> RB[Assess threads]
+        RB --> RC[Review code]
+        RC --> RD[Show findings]
+        RD --> RE{Pick which to post}
+        RE -->|Selected| RF[Post threads]
+    end
+
     K --> L
-    REVIEWER([👤 Reviewer]) --> RA
 
-    subgraph REVIEW["🔍 review.md — when asked to review"]
-        RA[AI fetches diff + open threads] --> RB[AI assesses existing threads]
-        RB --> RC[AI reviews code]
-        RC --> RD[AI shows findings table]
-        RD --> RE{You pick which to post}
-        RE -->|Selected| RF[AI posts GitLab threads]
+    subgraph MORNING["☀️ morning.md"]
+        L[Update MR descriptions] --> M[Draft thread replies]
+        M --> N[Write handover]
+        N --> O[Check GitLab + Sonar]
+        O --> P[📋 Task list]
     end
 
-    subgraph MORNING["☀️ morning.md — every morning"]
-        L[AI updates all MR descriptions] --> M[AI drafts thread replies]
-        M --> N[AI writes handover]
-        N --> O[AI checks GitLab + SonarQube]
-        O --> P[📋 Prioritised task list for the day]
-    end
+    P -->|More work| G
+    P -->|Ready to merge| Q
 
-    P -->|More work to do| G
-    P -->|MR ready to merge| Q
-
-    subgraph CLOSE["✅ close.md — after merge"]
-        Q[You merge in GitLab] --> R[AI compares delivery vs plan]
-        R --> T[📄 Retrospective written]
+    subgraph CLOSE["✅ close.md"]
+        Q[Merge in GitLab] --> R[Delivery vs plan]
+        R --> T[📄 Retrospective]
     end
 ```
 
@@ -80,37 +80,37 @@ sequenceDiagram
     participant GL as 🦊 GitLab
     participant SQ as 📊 SonarQube
 
-    Note over Dev,SQ: ☀️ morning.md — start of day
+    Note over Dev,SQ: ☀️ morning.md
 
     AI->>GL: Update MR descriptions
-    AI->>GL: Fetch reviewer threads → draft replies
+    AI->>GL: Fetch threads + draft replies
     AI->>AI: Write handover.md
-    AI->>GL: Fetch MR status + pipeline
-    AI->>SQ: Fetch quality gate + coverage
-    AI-->>Dev: Prioritised task list
+    AI->>GL: Fetch MR status
+    AI->>SQ: Fetch quality gate
+    AI-->>Dev: Task list for the day
 
-    Note over Dev,SQ: 💻 Development loop
+    Note over Dev,SQ: 💻 commit.md
 
     loop Each task
-        Dev->>AI: Implement task N
+        Dev->>AI: Implement task
         AI-->>Dev: Code + tests
         Dev->>AI: commit.md
-        AI->>AI: Auto-stage + lint + run hooks
-        AI-->>Dev: Files changed + proposed message
-        Dev->>AI: ✅ Approve + push
-        AI->>GL: git commit + push
+        AI->>AI: Stage + lint + hooks
+        AI-->>Dev: Files + message
+        Dev->>AI: ✅ Approve
+        AI->>GL: Commit + push
     end
 
-    Note over Rev,GL: 🔍 review.md — when asked to review
+    Note over Rev,GL: 🔍 review.md
 
     Rev->>AI: review.md
-    AI->>GL: Fetch MR diff + open threads
-    AI->>AI: Assess existing threads (code / reply / needs attention)
-    AI->>AI: Review diff (bugs, security, perf, style, tests)
-    AI-->>Rev: Findings table + thread assessment
-    Rev->>AI: Pick findings to post (e.g. 1 3 4)
-    AI->>GL: Post selected findings as discussion threads
-    AI-->>Rev: Summary — threads posted + items needing attention
+    AI->>GL: Fetch diff + threads
+    AI->>AI: Assess open threads
+    AI->>AI: Review code
+    AI-->>Rev: Findings + assessment
+    Rev->>AI: Pick findings to post
+    AI->>GL: Post threads
+    AI-->>Rev: Summary
 ```
 
 ---
