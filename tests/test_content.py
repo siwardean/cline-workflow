@@ -85,7 +85,7 @@ def test_workflow_description_consistent_across_tools(workflow):
 # memory-bank/current-mr.md references
 # ---------------------------------------------------------------------------
 
-WORKFLOWS_THAT_READ_CONFIG = ["start", "morning", "commit", "review", "close"]
+WORKFLOWS_THAT_READ_CONFIG = ["start", "morning", "commit", "code-reviewer", "close"]
 
 
 @pytest.mark.parametrize("workflow", WORKFLOWS_THAT_READ_CONFIG)
@@ -105,7 +105,7 @@ def test_workflow_references_current_mr(workflow):
 MCP_TOOL_CONTRACTS = {
     "morning": ["gitlab_get_merge_request", "gitlab_get_discussions", "gitlab_update_merge_request"],
     "commit":  ["gitlab_update_merge_request"],
-    "review":  ["gitlab_get_merge_request", "gitlab_get_discussions", "gitlab_create_discussion"],
+    "code-reviewer":  ["gitlab_get_merge_request", "gitlab_get_discussions", "gitlab_create_discussion"],
     "close":   ["gitlab_get_merge_request", "gitlab_get_discussions"],
 }
 
@@ -199,62 +199,62 @@ def test_all_rules_files_define_branch_format():
 # ---------------------------------------------------------------------------
 
 def test_review_prompts_for_mr_on_main():
-    """review.md must handle the case where the user is on main/master."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must handle the case where the user is on main/master."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     assert "main" in content and "master" in content, \
-        "review.md must handle being run from main/master branch"
+        "code-reviewer.md must handle being run from main/master branch"
     # Must ask for MR IID or branch name in that case
     assert "mr_iid" in content.lower() or "MR IID" in content, \
-        "review.md must prompt for MR IID when branch is not matched"
+        "code-reviewer.md must prompt for MR IID when branch is not matched"
 
 
 def test_review_thread_assessment_categories():
-    """review.md must classify existing threads into the three expected states."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must classify existing threads into the three expected states."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     assert "Addressed by code" in content, \
-        "review.md missing thread classification: 'Addressed by code'"
+        "code-reviewer.md missing thread classification: 'Addressed by code'"
     assert "Addressed by reply" in content, \
-        "review.md missing thread classification: 'Addressed by reply'"
+        "code-reviewer.md missing thread classification: 'Addressed by reply'"
     assert "Needs attention" in content, \
-        "review.md missing thread classification: 'Needs attention'"
+        "code-reviewer.md missing thread classification: 'Needs attention'"
 
 
 def test_review_single_approval_gate():
-    """review.md must have exactly one prompt for the user, not one per finding."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must have exactly one prompt for the user, not one per finding."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     # Must ask which findings to post in a single step
     assert "which" in content.lower() and ("post" in content.lower() or "thread" in content.lower()), \
-        "review.md must have a single 'which findings to post' prompt"
+        "code-reviewer.md must have a single 'which findings to post' prompt"
     # Must NOT require per-finding confirmation
     assert "approve each" not in content.lower(), \
-        "review.md must not ask for per-finding approval"
+        "code-reviewer.md must not ask for per-finding approval"
 
 
 def test_review_severity_levels():
-    """review.md must define severity levels for findings."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must define severity levels for findings."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     for level in ["Critical", "Major", "Minor"]:
         assert level in content, \
-            f"review.md missing severity level '{level}'"
+            f"code-reviewer.md missing severity level '{level}'"
 
 
 def test_review_does_not_auto_post():
-    """review.md must not post threads without user selection."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must not post threads without user selection."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     does_not = content.split("❌ DOES NOT")[1].split("##")[0] if "❌ DOES NOT" in content else ""
     assert "without" in does_not.lower() or "approval" in does_not.lower() or "explicit" in does_not.lower(), \
-        "review.md DOES NOT section must state it won't post without user selection"
+        "code-reviewer.md DOES NOT section must state it won't post without user selection"
 
 
 def test_review_covers_all_categories():
-    """review.md must cover the core review categories."""
-    path = workflow_path("cline", "review")
+    """code-reviewer.md must cover the core review categories."""
+    path = workflow_path("cline", "code-reviewer")
     content = path.read_text()
     for category in ["Security", "Performance", "Bug", "Test"]:
         assert category in content, \
-            f"review.md missing review category '{category}'"
+            f"code-reviewer.md missing review category '{category}'"

@@ -1,7 +1,6 @@
 ---
-name: review
+name: code-reviewer
 description: Review the current MR and post agreed comments as GitLab threads
-alwaysApply: false
 ---
 
 # MR Review Workflow
