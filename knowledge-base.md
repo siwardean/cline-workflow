@@ -242,9 +242,13 @@ precommit_runner: null             # null | lint-staged | pre-commit | both
 
 #### /start.md — Feature Planning + Branch + MR
 
-**When:** Beginning of every feature.
+**When:** Beginning of every feature — or to attach a plan to an existing branch/MR.
 
-**Flow:** Reads story → greps codebase → generates 5–12 task plan → presents for your review → on approval: creates branch + GitLab MR automatically, writes `memory-bank/story.md`
+**Flow:** Reads story → greps codebase → generates 5–12 task plan → presents for your review → on approval: **detects existing branch and MR, creates only what is missing** → writes `memory-bank/story.md`
+
+- Already on a feature branch? Branch creation is skipped.
+- MR already open for that branch? MR creation is skipped.
+- Neither exists? Both are created.
 
 **Input:** Paste your story in chat:
 ```
@@ -254,7 +258,7 @@ Acceptance criteria:
   1. ...
 ```
 
-**Output:** Feature branch (pushed) · GitLab MR (Draft) · `memory-bank/story.md`
+**Output:** Feature branch (pushed or reused) · GitLab MR (Draft, created or reused) · `memory-bank/story.md`
 
 ---
 
@@ -321,7 +325,7 @@ Cline has no built-in memory between sessions. The `memory-bank/` folder is the 
 
 | Workflow | When | Output |
 |---|---|---|
-| `/start.md` | Beginning of feature | Branch + MR created · `memory-bank/story.md` |
+| `/start.md` | Beginning of feature (or existing branch/MR) | Branch + MR created or reused · `memory-bank/story.md` |
 | `/morning.md` | Start of workday | Updated MR descriptions + draft replies + status report |
 | `/commit.md` | After code changes | Committed + pushed + MR progress updated |
 | `/code-reviewer.md` | When reviewing an MR | GitLab discussion threads posted |
@@ -337,7 +341,7 @@ Cline has no built-in memory between sessions. The `memory-bank/` folder is the 
 | Can't access GitLab MR | Run `python validate_mcp_setup.py` · Check `project_id` + `mr_iid` |
 | Hooks not running | Set `precommit_runner` in `current-mr.md`: `lint-staged` / `pre-commit` / `both` / `null` |
 | `story.md` missing | Paste story details manually in chat when running `/close.md` |
-| Branch/MR not created | `/start.md` creates them on plan approval — ensure GitLab MCP is reachable |
+| Branch/MR not created | `/start.md` creates them on plan approval (skips any that already exist) — ensure GitLab MCP is reachable |
 
 ---
 
