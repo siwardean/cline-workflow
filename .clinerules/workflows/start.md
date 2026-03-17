@@ -1,26 +1,28 @@
 ---
 name: start
-description: Plan a user story, then auto-create the git branch and GitLab MR
+description: Plan a user story, then create the git branch and GitLab MR — skipping any that already exist
 ---
 
 # Feature Start (User Story → Plan → Branch → MR)
 
 ## What This Workflow Does
 
-**Takes your user story, builds an execution plan, waits for your approval, then creates the branch and MR automatically.**
+**Takes your user story, builds an execution plan, waits for your approval, then sets up the branch and MR — creating only what is missing.**
 
 ### ✅ DOES:
 - Asks you for the story title, description, and acceptance criteria (that's all you need to provide)
 - Searches the codebase for relevant code
 - Creates a 5-12 task execution plan mapped to acceptance criteria
 - **Presents the plan for your review** — nothing is created until you approve
-- Creates the git feature branch locally and pushes it
-- Creates the GitLab MR via MCP with a concise plan in the description
+- Detects whether the feature branch and/or MR already exist
+- Creates the git feature branch and pushes it — **skipped if it already exists**
+- Creates the GitLab MR via MCP with a concise plan in the description — **skipped if one already exists for that branch**
 - Writes the full plan to `memory-bank/story.md`
-- Updates `memory-bank/current-mr.md` with the new MR details
+- Updates `memory-bank/current-mr.md` with the MR details (new or existing)
 
 ### ❌ DOES NOT:
 - Does NOT create branch or MR without your explicit approval of the plan
+- Does NOT recreate a branch or MR that already exists
 - Does NOT write production code
 - Does NOT modify any existing source files
 
@@ -62,6 +64,29 @@ run_terminal_cmd: git branch --show-current
 ```
 
 Extract: `project_id`, `base_branch`. If missing, stop and ask the user to set them in `memory-bank/current-mr.md`.
+
+**Check for existing branch and MR:**
+```
+run_terminal_cmd: git fetch origin
+run_terminal_cmd: git branch -a
+```
+Note the current branch. If the user is already on a feature branch (not `base_branch`), record it as `existing_branch = true` and capture the branch name — branch creation in Step 7 will be skipped.
+
+Check for an open MR on that branch via MCP:
+```
+gitlab_list_merge_requests (or equivalent):
+  project_id: {project_id}
+  source_branch: {current_branch}   # only if already on a feature branch
+  state: opened
+```
+If a matching MR is returned, record `existing_mr = true` and capture the `mr_iid` — MR creation in Step 8 will be skipped.
+
+Summarise the detected state before proceeding:
+```
+🔍 Detected state:
+  Branch:  {branch_name}  ({existing_branch ? "already exists — will reuse" : "will be created"})
+  MR:      {existing_mr ? "!{mr_iid} already open — will reuse" : "not found — will be created"}
+```
 
 **Ensure memory-bank files are gitignored** — these are local AI workflow state and must not be committed to the developer's project, as parallel developers updating the same files will cause merge conflicts:
 ```
@@ -203,8 +228,14 @@ Once approved, produce a **concise plan summary** (max ~20 lines) to use as the 
 - {Main risks or "None identified"}
 ```
 
-### 7) Create the feature branch
+### 7) Create the feature branch (skip if already exists)
 
+**If `existing_branch = true`:** skip this step entirely — the branch is already in place. Confirm to the user:
+```
+✅ Branch {feature_branch} already exists — reusing it.
+```
+
+**If `existing_branch = false`:** create and push the branch:
 ```
 run_terminal_cmd: git checkout {base_branch}
 run_terminal_cmd: git pull origin {base_branch}
@@ -213,11 +244,16 @@ run_terminal_cmd: git commit --allow-empty -m "feat: initialize {slug}"
 run_terminal_cmd: git push -u origin {feature_branch}
 ```
 
-**Error handling:** If the branch already exists, inform the user and ask whether to reuse it or pick a different name.
+**Error handling:** If the push fails because the remote branch already exists unexpectedly, set `existing_branch = true`, check out the remote branch, and continue.
 
-### 8) Create the GitLab MR via MCP
+### 8) Create the GitLab MR via MCP (skip if already exists)
 
-**List MCP tools available** to discover exact tool names, then create the MR:
+**If `existing_mr = true`:** skip creation. Confirm to the user:
+```
+✅ MR !{mr_iid} already open — reusing it.
+```
+
+**If `existing_mr = false`:** list MCP tools available to discover exact tool names, then create the MR:
 
 ```
 gitlab_create_merge_request (or equivalent tool):
@@ -265,6 +301,7 @@ Next steps:
 
 ## Success Criteria
 - Developer only typed their story information — no manual git or GitLab steps
-- Plan was reviewed and approved before any branch or MR was created
+- Plan was reviewed and approved before any branch or MR was created or reused
+- Existing branch and/or MR are detected and reused — never duplicated
 - MR description contains the concise approved plan
 - `memory-bank/story.md` and `memory-bank/current-mr.md` are up to date
