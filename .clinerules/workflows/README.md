@@ -12,7 +12,7 @@ Five workflows cover the entire feature lifecycle. Run them by telling your AI a
 | **start.md** | Once, before development begins | Yes — creates MR | No |
 | **morning.md** | Every morning | Yes — updates MR descriptions | No |
 | **commit.md** | After each set of code changes | Yes — updates MR progress | No (only commits) |
-| **review.md** | When asked to review an MR | Yes — posts discussion threads | No |
+| **code-reviewer.md** | When asked to review an MR | Yes — posts discussion threads | No |
 | **close.md** | Once, after MR is merged | Read-only | No |
 
 ---
@@ -171,7 +171,7 @@ If GitLab MCP is unavailable, the commit still goes through — the MR update is
 
 ---
 
-## review.md — MR Code Review
+## code-reviewer.md — MR Code Review
 
 **Trigger:** You're asked to review someone else's MR (or your own before asking for approval).
 

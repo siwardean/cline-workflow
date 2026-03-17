@@ -32,7 +32,7 @@ flowchart TD
         end
     end
 
-    subgraph REVIEW["🔍 review.md"]
+    subgraph REVIEW["🔍 code-reviewer.md"]
         RA[Fetch diff + threads] --> RB[Assess threads]
         RB --> RC[Review code]
         RC --> RD[Show findings]
@@ -67,7 +67,7 @@ flowchart TD
 | **start.md** | New feature | Story title, description, ACs | Plan → branch → MR |
 | **morning.md** | Every morning | Nothing | Wrap up yesterday + status check |
 | **commit.md** | After code changes | Approve message + push | Auto-stage → lint → single approval → push |
-| **review.md** | When asked to review an MR | Which findings to post | Diff review → thread assessment → post threads |
+| **code-reviewer.md** | When asked to review an MR | Which findings to post | Diff review → thread assessment → post threads |
 | **close.md** | After MR merged | Nothing | Retrospective |
 
 ### Daily Developer Flow
@@ -101,9 +101,9 @@ sequenceDiagram
         AI->>GL: Commit + push
     end
 
-    Note over Rev,GL: 🔍 review.md
+    Note over Rev,GL: 🔍 code-reviewer.md
 
-    Rev->>AI: review.md
+    Rev->>AI: code-reviewer.md
     AI->>GL: Fetch diff + threads
     AI->>AI: Assess open threads
     AI->>AI: Review code
@@ -186,14 +186,14 @@ uv pip install python-gitlab-mcp sonar-mcp
 ```
 /morning
 /commit
-/review
+/code-reviewer
 ```
 
 **All other tools:**
 ```
 Run the morning.md workflow
 Run the commit.md workflow
-Run the review.md workflow
+Run the code-reviewer.md workflow
 ```
 
 ---
