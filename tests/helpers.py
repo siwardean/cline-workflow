@@ -7,7 +7,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent
 
 # All workflow names (no extension)
-WORKFLOWS = ["start", "morning", "commit", "close"]
+WORKFLOWS = ["start", "morning", "commit", "code-reviewer", "close"]
 
 # Paths per tool
 TOOL_WORKFLOW_DIRS = {
