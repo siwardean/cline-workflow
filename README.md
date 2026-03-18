@@ -17,7 +17,7 @@ flowchart TD
         C --> D[Generate plan]
         D --> E{Review plan}
         E -->|Revise| D
-        E -->|✅ Approve| F[Create branch + MR]
+        E -->|✅ Approve| F[Create branch + MR if missing]
     end
 
     F --> G
